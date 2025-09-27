@@ -19,7 +19,7 @@ body {
   padding: 24px;
   background: linear-gradient(180deg, #e6f7ee 0%, #f7fbf6 100%);
   background-image: url("../img/bg.png");
-  background-repeat: no-repeat;
+  background-repeat: repeat-x;
   background-size: cover;
   background-attachment: fixed;
   color: #123;

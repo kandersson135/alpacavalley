@@ -8,6 +8,15 @@ alpacaAudio.volume = 0.3;
 alpacaAudio.loop = true;
 alpacaAudio.play();
 
+// scroll background
+let xPos = 0;
+function scrollBackground() {
+    xPos -= 0.2; // speed of scroll
+    $('body').css('background-position', xPos + 'px 0');
+    requestAnimationFrame(scrollBackground);
+}
+scrollBackground();
+
 // -- Game data & defaults
 const defaultState = {
   level:1, exp:0, wool:0, coins:0, happiness:50, herd:1,
