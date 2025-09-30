@@ -252,6 +252,7 @@ function displayAlpacas(){
       }
 
       runAway();
+      updateUI();
     });
   }
 
