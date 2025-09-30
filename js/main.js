@@ -1,21 +1,23 @@
 // Game audio
 let bgAudio = new Audio('audio/bg.ogg');
-let alpacaAudio = new Audio('audio/alpaca-noise.mp3');
+let alpacaAudio = new Audio('audio/alpaca-noise4.mp3');
+let alpacaNoise = new Audio('audio/alpaca-noise3.mp3');
+let popAudio = new Audio('audio/pop.mp3');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
 bgAudio.play();
 alpacaAudio.volume = 0.3;
 alpacaAudio.loop = true;
 alpacaAudio.play();
+alpacaNoise.volume = 0.3;
+popAudio.volume = 0.3;
 
-// scroll background
-let xPos = 0;
-function scrollBackground() {
-    xPos -= 0.2; // speed of scroll
-    $('body').css('background-position', xPos + 'px 0');
-    requestAnimationFrame(scrollBackground);
-}
-scrollBackground();
+// Attach event to all buttons
+$(document).on("mousedown", "button", function() {
+  // Reset sound to start (in case it overlaps)
+  popAudio.currentTime = 0;
+  popAudio.play();
+});
 
 // -- Game data & defaults
 const defaultState = {
@@ -41,16 +43,22 @@ const ACH_DEFS = [
 
 // New power-ups store
 const STORE = [
-  {id:'double_wool', title:'Double Wool (30s)', cost:100, duration:30, apply: s=>({multWool:2})},
-  {id:'auto_shear', title:'Auto-Shear (60s)', cost:200, duration:60, apply: s=>({autoShear:true})},
-  {id:'click_boost', title:'Click Boost (30s)', cost:150, duration:30, apply: s=>({clickMult:3})},
-  {id:'happy_boost', title:'Happiness Boost (30s)', cost:120, duration:30, apply: s=>({happyAdd:20})},
-  {id:'coin_bonus', title:'Coin Bonus (30s)', cost:180, duration:30, apply: s=>({coinMult:2})},
-  {id:'super_shear', title:'Super Shear (30s)', cost:250, duration:30, apply: s=>({shearMult:3})}
+  {id:'double_wool', title:'Double Wool', cost:100, duration:30, apply: s=>({multWool:2})},
+  {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
+  {id:'click_boost', title:'Click Boost', cost:150, duration:30, apply: s=>({clickMult:3})},
+  {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
+  {id:'coin_bonus', title:'Coin Bonus', cost:180, duration:30, apply: s=>({coinMult:2})},
+  {id:'super_shear', title:'Super Shear', cost:250, duration:30, apply: s=>({shearMult:3})},
+  {id:'auto_craft', title:'Auto-Craft', cost:300, duration:60, apply: s=>({autoCraft:true})}
 ];
 
 const alpacaImages = [
-'img/alpacas/alpaca.png',
+  'img/alpacas/black.gif',
+  'img/alpacas/white.gif',
+  'img/alpacas/white2.gif',
+  'img/alpacas/brown.gif',
+  'img/alpacas/brown2.gif',
+  'img/alpacas/brown3.gif',
 ];
 
 // state
@@ -60,7 +68,7 @@ let S = loadState();
 function saveState(){
   S.lastTick = Date.now();
   localStorage.setItem('alpaca_save', JSON.stringify(S));
-  log('Game saved');
+  //log('Game saved');
   updateUI();
 }
 function loadState(){
@@ -69,6 +77,7 @@ function loadState(){
     if(raw){
       const parsed = JSON.parse(raw);
       // migrate defaults
+      log('Game loaded from last save.');
       return Object.assign({}, defaultState, parsed);
     }
   }catch(e){console.error(e)}
@@ -77,7 +86,7 @@ function loadState(){
 
 function log(text){
   const time = new Date().toLocaleTimeString();
-  $('#log').prepend(`<div style=\"margin-bottom:6px\"><small class=\"muted\">[${time}]</small> ${text}</div>`);
+  $('#messageCenter').prepend(`<div class=\"logEntry\"><small class=\"logTimestamp\">[${time}]</small> ${text}</div>`);
 }
 
 // Experience & Leveling
@@ -119,35 +128,126 @@ function displayAlpacas(){
     const img = $('<img>');
     img.attr('src', alpacaImages[randomIndex]);
     img.css({
-      width:'48px',
-      height:'48px',
+      width:'29px',
+      height:'36px',
       imageRendering:'pixelated',
       position:'absolute',
       left: Math.random()*(containerWidth-48)+'px',
       top: Math.random()*(containerHeight-48)+'px',
-      transform: Math.random() < 0.5 ? 'scaleX(1)' : 'scaleX(-1)' // initial random flip
+      transform: 'scaleX(1)' // start facing right by default
     });
     container.append(img);
 
-    (function wander(el){
+    // Wander function for continuous random movement
+    // function wander(el) {
+    //   const container = $('#alpacaImagesContainer');
+    //   const containerWidth = container.width();
+    //   const containerHeight = container.height();
+    //
+    //   (function move(){
+    //     const currentLeft = parseFloat(el.css('left')) || 0;
+    //     const currentTop = parseFloat(el.css('top')) || 0;
+    //     const deltaX = (Math.random()-0.5)*20; // small steps
+    //     const deltaY = (Math.random()-0.5)*20;
+    //     const newLeft = Math.min(Math.max(currentLeft+deltaX, 0), containerWidth-48);
+    //     const newTop = Math.min(Math.max(currentTop+deltaY, 0), containerHeight-48);
+    //
+    //     // Flip occasionally
+    //     if(Math.random() < 0.3){
+    //       const currentTransform = el.css('transform');
+    //       el.css('transform', currentTransform === 'matrix(-1, 0, 0, 1, 0, 0)' ? 'scaleX(1)' : 'scaleX(-1)');
+    //     }
+    //
+    //     el.animate({left:newLeft+'px', top:newTop+'px'}, 4000 + Math.random()*4000, 'linear', move);
+    //   })();
+    // }
+
+    function wander(el){
       function move(){
         const currentLeft = parseFloat(el.css('left')) || 0;
         const currentTop = parseFloat(el.css('top')) || 0;
-        const deltaX = (Math.random()-0.5)*50;
-        const deltaY = (Math.random()-0.5)*50;
-        const newLeft = Math.min(Math.max(currentLeft+deltaX, 0), containerWidth-48);
-        const newTop = Math.min(Math.max(currentTop+deltaY, 0), containerHeight-48);
 
-        // Flip occasionally at random (not synchronized)
-        if(Math.random() < 0.3){ // 30% chance per move to flip
-          const currentTransform = el.css('transform');
-          el.css('transform', currentTransform === 'matrix(-1, 0, 0, 1, 0, 0)' ? 'scaleX(1)' : 'scaleX(-1)');
+        // Random step distance (small shuffle vs bigger move)
+        const deltaX = (Math.random()-0.5) * (20 + Math.random()*60); // 20–80px range
+        const deltaY = (Math.random()-0.5) * (20 + Math.random()*60);
+
+        const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth-48);
+        const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight-48);
+
+        // Flip based on horizontal direction
+        if(deltaX > 0){
+          el.css('transform', 'scaleX(1)');
+        } else if(deltaX < 0){
+          el.css('transform', 'scaleX(-1)');
         }
 
-        el.animate({left:newLeft+'px', top:newTop+'px'}, 10000, 'swing', move);
+        // Random step duration (2s–6s)
+        const stepTime = 6000 + Math.random()*4000;
+
+        el.animate(
+          { left:newLeft+'px', top:newTop+'px' },
+          stepTime,
+          'linear',
+          move
+        );
       }
       move();
-    })(img);
+    }
+
+    wander(img);
+
+    img.click(function() {
+      const el = $(this);
+      const runDuration = 3000; // 3 seconds
+      const containerWidth = $('#alpacaImagesContainer').width();
+      const containerHeight = $('#alpacaImagesContainer').height();
+
+      alpacaNoise.currentTime = 0;
+      alpacaNoise.play();
+
+      el.stop(true);
+
+      // Random persistent direction for this run
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = 1; // pixels per frame, smaller = smoother
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+
+      const startTime = Date.now();
+
+      function runAway() {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= runDuration) {
+          wander(el); // resume normal wandering
+          return;
+        }
+
+        let currentLeft = parseFloat(el.css('left')) || 0;
+        let currentTop = parseFloat(el.css('top')) || 0;
+
+        // Move in persistent direction
+        let newLeft = currentLeft + vx;
+        let newTop = currentTop + vy;
+
+        // Keep inside container
+        if (newLeft < 0 || newLeft > containerWidth - el.width()) {
+          newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
+          // Reverse X direction if hitting wall
+          el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
+        } else {
+          el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
+        }
+
+        if (newTop < 0 || newTop > containerHeight - el.height()) {
+          newTop = Math.min(Math.max(newTop, 0), containerHeight - el.height());
+        }
+
+        el.css({ left: newLeft + 'px', top: newTop + 'px' });
+        requestAnimationFrame(runAway);
+      }
+
+      runAway();
+    });
   }
 
   $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
@@ -266,14 +366,45 @@ function applyPowerupEffects(){ // cleanup expired & apply
 }
 
 // Idle tick
+// function tick(dtSec){
+//   // base idle wool
+//   let rate = S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2);
+//   if(S.autoShear) rate += 0.5; // bought robot
+//   // powerups
+//   S.powerupsActive.forEach(p=>{ if(p.id==='auto_shear') rate += 1.0; if(p.meta && p.meta.multWool) rate *= p.meta.multWool; });
+//   const amount = rate * dtSec;
+//   S.wool += amount;
+//   // happiness slowly decays if not fed
+//   S.happiness = Math.max(0, S.happiness - dtSec*0.01);
+//   addExp( Math.floor(dtSec * 0.2) );
+// }
+
 function tick(dtSec){
   // base idle wool
   let rate = S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2);
-  if(S.autoShear) rate += 0.5; // bought robot
+  if(S.autoShear) rate += 0.5; // robot upgrade
   // powerups
-  S.powerupsActive.forEach(p=>{ if(p.id==='auto_shear') rate += 1.0; if(p.meta && p.meta.multWool) rate *= p.meta.multWool; });
+  S.powerupsActive.forEach(p=>{
+    if(p.id==='double_wool') rate *= 2;
+    if(p.id==='auto_shear') rate += 1.0;
+    if(p.meta && p.meta.multWool) rate *= p.meta.multWool;
+  });
   const amount = rate * dtSec;
   S.wool += amount;
+
+  // NEW: Auto-Craft effect
+  if (S.powerupsActive.some(p => p.id === 'auto_craft')) {
+    const crafts = Math.floor(S.wool / 5); // every 5 wool
+    if(crafts > 0){
+      const sale = 20 + Math.floor(S.level*2);
+      const crafted = Math.min(crafts, 1); // craft at most once per tick
+      S.wool -= 5 * crafted;
+      S.coins += sale * crafted;
+      addExp(6 * crafted);
+      log(`Auto-crafted yarn and sold for ${sale * crafted} coins.`);
+    }
+  }
+
   // happiness slowly decays if not fed
   S.happiness = Math.max(0, S.happiness - dtSec*0.01);
   addExp( Math.floor(dtSec * 0.2) );
@@ -299,10 +430,19 @@ function getAvailablePowerups(){
   if(p.id==='auto_shear') return S.level >= 3;
   if(p.id==='click_boost') return S.level >= 5;
   if(p.id==='happy_boost') return S.level >= 10;
-  if(p.id==='coin_bonus') return S.level >= 15;
+  // if(p.id==='coin_bonus') return S.level >= 15;
+  if(p.id==='auto_craft') return S.level >= 15;
   if(p.id==='super_shear') return S.level >= 20;
   return false;
   });
+}
+
+// format number
+function formatNumber(num) {
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + "B";
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + "M";
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + "k";
+  return Math.floor(num); // keep as integer under 1k
 }
 
 // autosave scheduler
@@ -315,7 +455,8 @@ function updateUI(){
   const need = expToNext(S.level);
   $('#expText').text(`${Math.floor(S.exp)} / ${need}`);
   $('#expBar').css('width', Math.min(100, (S.exp/need*100)) + '%');
-  $('#woolDisplay').text(Math.floor(S.wool));
+  //$('#woolDisplay').text(Math.floor(S.wool));
+  $('#woolDisplay').text(formatNumber(S.wool));
   $('#coinsDisplay').text(Math.floor(S.coins));
   $('#storeCoins').text(Math.floor(S.coins));
   $('#happyDisplay').text(Math.floor(S.happiness) + '%');
@@ -324,7 +465,8 @@ function updateUI(){
   $('#timeDisplay').text(new Date().toLocaleString());
 
   const alpacaCost = 200 * S.herd;
-  $('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
+  //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
+  $('#buyAlpacaBtn').text(`Buy Alpaca`);
 
   // update store
   $('#storeArea').empty();
@@ -333,7 +475,7 @@ function updateUI(){
     $('#storeArea').append(`
     <div class="power" style="${disabled}">
       <div style="font-weight:700">${p.title}</div>
-      <small>${p.duration}s</small>
+      <small>Duration: ${p.duration}s</small>
       <div style="margin-top:6px"><b>${p.cost} coins</b></div>
       <div style="margin-top:6px"><button class="btn" data-buy="${p.id}">Buy</button></div>
     </div>
