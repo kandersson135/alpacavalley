@@ -202,8 +202,13 @@ function displayAlpacas(){
       const containerWidth = $('#alpacaImagesContainer').width();
       const containerHeight = $('#alpacaImagesContainer').height();
 
+      // Play alpaca noise
       alpacaNoise.currentTime = 0;
       alpacaNoise.play();
+
+      // Reduce happiness for stressing the alpaca
+      S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
+      log("The alpaca got stressed! Happiness -3");
 
       el.stop(true);
 
@@ -406,7 +411,7 @@ function tick(dtSec){
   }
 
   // happiness slowly decays if not fed
-  S.happiness = Math.max(0, S.happiness - dtSec*0.01);
+  S.happiness = Math.max(0, S.happiness - dtSec*0.1);
   addExp( Math.floor(dtSec * 0.2) );
 }
 
