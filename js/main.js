@@ -9,7 +9,7 @@ bgAudio.play();
 alpacaAudio.volume = 0.3;
 alpacaAudio.loop = true;
 alpacaAudio.play();
-alpacaNoise.volume = 0.3;
+alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
 
 // Attach event to all buttons
