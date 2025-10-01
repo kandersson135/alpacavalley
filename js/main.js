@@ -463,7 +463,8 @@ function updateUI(){
   $('#expBar').css('width', Math.min(100, (S.exp/need*100)) + '%');
   //$('#woolDisplay').text(Math.floor(S.wool));
   $('#woolDisplay').text(formatNumber(S.wool));
-  $('#coinsDisplay').text(Math.floor(S.coins));
+  // $('#coinsDisplay').text(Math.floor(S.coins));
+  $('#coinsDisplay').text(formatNumber(S.coins));
   $('#storeCoins').text(Math.floor(S.coins));
   $('#happyDisplay').text(Math.floor(S.happiness) + '%');
   //$('#herdSize').text(S.herd);
