@@ -1,15 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Lemon&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Mynerve&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Schoolbell&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Annie+Use+Your+Telescope&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Chelsea+Market&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Margarine&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Neucha&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gluten:wght@100..900&display=swap');
 
 html, body {
@@ -25,18 +15,6 @@ button,
 
 body {
   margin: 0;
-
-  font-family: "Lemon", cursive;
-  font-family: 'Amatic SC', cursive;
-  font-family: "Fuzzy Bubbles", sans-serif;
-  font-family: "Mynerve", cursive;
-  font-family: "Schoolbell", cursive;
-  font-family: "Winky Sans", sans-serif;
-    font-family: "Annie Use Your Telescope", cursive;
-      font-family: "Sour Gummy", sans-serif;
-        font-family: "Chelsea Market", system-ui;
-          font-family: "Margarine", sans-serif;
-            font-family: "Neucha", cursive;
   font-family: "Open Sans", sans-serif;
   background-color: #eee;
   color: #333;
