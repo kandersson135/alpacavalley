@@ -309,7 +309,8 @@ footer {
 }
 
 .power button:active {
-  transform: translate(0px, 2px); /* replaces top/left */
+  position: relative;
+  top: 2px;
   box-shadow: none;
 }
 
