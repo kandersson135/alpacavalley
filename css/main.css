@@ -19,7 +19,7 @@ html, body {
 }
 
 button,
-.statusBar h1 {
+.statusBar a {
   cursor: url("../img/hand-cursor.png") 4 4, auto !important;
 }
 
