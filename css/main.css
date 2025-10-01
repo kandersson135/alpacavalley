@@ -18,7 +18,8 @@ html, body {
     cursor: url("../img/pointer-cursor.png") 4 4, auto;
 }
 
-button {
+button,
+.statusBar h1 {
   cursor: url("../img/hand-cursor.png") 4 4, auto !important;
 }
 
