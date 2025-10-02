@@ -487,7 +487,7 @@ function updateUI(){
 
   const alpacaCost = 200 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
-  $('#buyAlpacaBtn').text(`Buy Alpaca`);
+  $('#buyAlpacaBtn').attr('data-title', `Cost ${alpacaCost} coins`);
 
   // update store
   $('#storeArea').empty();
