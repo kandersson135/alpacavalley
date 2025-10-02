@@ -338,9 +338,12 @@ footer a {
   height: 100%; /* adjust as needed */
   position: relative;
   overflow: hidden;
-  border: 16px solid #eee;
+  border: 16px solid #e6ccb2;
+  border-top-color: #ede0d4;
+  border-bottom-color: #ede0d4;
+  /* border: 16px solid #eee;
   border-top-color: #fff;
-  border-bottom-color: #fff;
+  border-bottom-color: #fff; */
   box-shadow: inset 0px  0px 20px rgba(50, 50, 50, 0.2);
 }
 
