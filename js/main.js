@@ -12,6 +12,8 @@ alpacaAudio.play();
 alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
 
+//localStorage.removeItem('alpaca_save');
+
 // Attach event to all buttons
 $(document).on("mousedown", "button", function() {
   // Reset sound to start (in case it overlaps)
@@ -45,7 +47,6 @@ const ACH_DEFS = [
 const STORE = [
   {id:'double_wool', title:'Double Wool', cost:100, duration:30, apply: s=>({multWool:2})},
   {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
-  {id:'click_boost', title:'Click Boost', cost:150, duration:30, apply: s=>({clickMult:3})},
   {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
   {id:'coin_bonus', title:'Coin Bonus', cost:180, duration:30, apply: s=>({coinMult:2})},
   {id:'super_shear', title:'Super Shear', cost:250, duration:30, apply: s=>({shearMult:3})},
@@ -285,7 +286,6 @@ function shear(){
   let mult = 1;
   S.powerupsActive.forEach(p=>{
     if(p.id==='double_wool' && p.meta && p.meta.multWool) mult *= p.meta.multWool;
-    if(p.id==='click_boost' && p.meta && p.meta.clickMult) mult *= p.meta.clickMult;
     if(p.id==='super_shear' && p.meta && p.meta.shearMult) mult *= p.meta.shearMult;
   });
   const gained = Math.floor(base * mult);
@@ -387,16 +387,31 @@ function applyPowerupEffects(){ // cleanup expired & apply
 
 function tick(dtSec){
   // base idle wool
-  let rate = S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2);
-  if(S.autoShear) rate += 0.5; // robot upgrade
-  // powerups
+  // let rate = S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2);
+  // if(S.autoShear) rate += 0.5; // robot upgrade
+  // // powerups
+  // S.powerupsActive.forEach(p=>{
+  //   if(p.id==='double_wool') rate *= 2;
+  //   if(p.id==='auto_shear') rate += 1.0;
+  //   if(p.meta && p.meta.multWool) rate *= p.meta.multWool;
+  // });
+  // const amount = rate * dtSec;
+  // S.wool += amount;
+
+  // No base idle wool, only auto systems
+  let rate = 0;
+
+  // Only add from autoShear upgrade or powerups
+  if(S.autoShear) rate += 0.5;
   S.powerupsActive.forEach(p=>{
     if(p.id==='double_wool') rate *= 2;
     if(p.id==='auto_shear') rate += 1.0;
     if(p.meta && p.meta.multWool) rate *= p.meta.multWool;
   });
+
   const amount = rate * dtSec;
   S.wool += amount;
+
 
   // NEW: Auto-Craft effect
   if (S.powerupsActive.some(p => p.id === 'auto_craft')) {
@@ -434,9 +449,8 @@ function getAvailablePowerups(){
   return STORE.filter(p => {
   if(p.id==='double_wool') return S.level >= 1;
   if(p.id==='auto_shear') return S.level >= 3;
-  if(p.id==='click_boost') return S.level >= 5;
+  if(p.id==='coin_bonus') return S.level >= 5;
   if(p.id==='happy_boost') return S.level >= 10;
-  // if(p.id==='coin_bonus') return S.level >= 15;
   if(p.id==='auto_craft') return S.level >= 15;
   if(p.id==='super_shear') return S.level >= 20;
   return false;
@@ -523,22 +537,6 @@ $(function(){
   // store buy
   $('#storeArea').on('click','button[data-buy]', function(){ const id=$(this).data('buy'); buyPowerup(id); updateUI(); });
 
-  // save/export/import
-  $('#saveBtn').click(()=>{ saveState(); });
-  $('#exportBtn').click(()=>{ const data = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); const blob = new Blob([data],{type:'text/plain'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='alpaca_save.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
-  $('#importBtn').click(()=>{
-    const txt = prompt('Paste exported save string here');
-    if(!txt) return; try{ const raw = decodeURIComponent(escape(atob(txt))); const parsed = JSON.parse(raw); S = Object.assign({}, defaultState, parsed); saveState(); updateUI(); alert('Imported!'); }catch(e){ alert('Invalid save string'); }
-  });
-
-  // quick actions: clicking the alpaca gives small wool/exp
-  $('.alpaca-image').click(()=>{
-    let clickMult = 1;
-    S.powerupsActive.forEach(p=>{ if(p.id==='click_boost') clickMult *= (p.meta && p.meta.clickMult? p.meta.clickMult:3); });
-    const gain = Math.max(1, Math.floor(1 * clickMult + S.level*0.2));
-    S.wool += gain; addExp(3); log(`You interact with the herd and got ${gain} wool.`); updateUI(); autosave();
-  });
-
   // initial achievements check
   checkAllAch();
   // autosave every 10s
@@ -546,5 +544,19 @@ $(function(){
   autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
 });
 
-// before unload
-window.addEventListener('beforeunload', ()=>{ saveState(); });
+let isResetting = false;
+
+$('#reset-btn').click(function() {
+  if (confirm("Are you sure you want to reset your farm? All progress will be lost!")) {
+    isResetting = true;
+    localStorage.removeItem('alpaca_save');
+    location.reload();
+  }
+});
+
+window.addEventListener('beforeunload', ()=>{
+  if (!isResetting) saveState();
+});
+
+// // before unload
+// window.addEventListener('beforeunload', ()=>{ saveState(); });
