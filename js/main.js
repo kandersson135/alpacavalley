@@ -489,6 +489,9 @@ function updateUI(){
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
   $('#buyAlpacaBtn').attr('data-title', `Cost ${alpacaCost} coins`);
 
+  const barnCost = 500 * S.barnLevel;
+  $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
+
   // update store
   $('#storeArea').empty();
   getAvailablePowerups().forEach(p=>{
