@@ -28,7 +28,7 @@
 
       <ul>
         <!-- <li><img src="img/Star.png" alt="Level"> <span id="levelDisplay">1</span> </li> -->
-        <li><img src="img/wool2.png" alt="Wool"> <span id="woolDisplay">0</span></li>
+        <li class="tooltip" id="idleRate" data-title="0"><img src="img/wool2.png" alt="Wool"> <span id="woolDisplay">0</span></li>
         <li><img src="img/alpacas/alpaca3.png" class="alpacaIcon"><span id="displayHerdSize"></span></li>
         <!-- <li>Auto wool / sec: <span id="idleRate">0</span></li> -->
         <li><img src="img/Coin.png" alt="Money"> <span id="coinsDisplay">0</span></li>
@@ -42,12 +42,12 @@
       <button id="feedBtn" class="btn">Feed</button>
       <button id="shearBtn" class="btn">Shear Wool</button>
       <button id="craftBtn" class="btn">Craft Yarn</button>
-      <button id="buyAlpacaBtn" class="btn tooltip" data-title="Cost ?? coins">Buy Alpaca</button>
+      <button id="buyAlpacaBtn" class="btn tooltip" data-title="Cost 0 coins">Buy Alpaca</button>
 
       <h3>Upgrades</h3>
       <!-- <div class="muted" style="margin-top:8px">Permanent improvements for your farm</div> -->
-      <button class="btn tooltip" id="upgradeBarn" data-title="Cost ?? coins">Upgrade Barn</button>
-      <button class="btn tooltip" id="upgradeAuto" data-title="Cost 800 coins">Buy Robot</button>
+      <button class="btn tooltip" id="upgradeBarn" data-title="Cost 0 coins">Upgrade Barn</button>
+      <button class="btn tooltip" id="upgradeAuto" data-title="Cost 0 coins">Buy Robot</button>
 
       <footer>v.0.0.8 <a href="#" id="reset-btn">Reset game</a></footer>
     </div><!-- end leftSidebar -->

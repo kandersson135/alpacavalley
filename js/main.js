@@ -409,6 +409,8 @@ function tick(dtSec){
     if(p.meta && p.meta.multWool) rate *= p.meta.multWool;
   });
 
+  $('#idleRate').attr('data-title', rate.toFixed(2) + "/s");
+
   const amount = rate * dtSec;
   S.wool += amount;
 
@@ -482,8 +484,10 @@ function updateUI(){
   $('#storeCoins').text(Math.floor(S.coins));
   $('#happyDisplay').text(Math.floor(S.happiness) + '%');
   //$('#herdSize').text(S.herd);
-  $('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
+  //$('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
   $('#timeDisplay').text(new Date().toLocaleString());
+
+  //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
 
   const alpacaCost = 200 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
@@ -491,6 +495,9 @@ function updateUI(){
 
   const barnCost = 500 * S.barnLevel;
   $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
+
+  const autoCost = 800;
+  $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
   // update store
   $('#storeArea').empty();

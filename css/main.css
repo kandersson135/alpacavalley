@@ -437,3 +437,8 @@ footer a {
   visibility: hidden;
   opacity: 0;
 }
+
+#idleRate.tooltip::after {
+  bottom: auto;
+  top: 125%;
+}
