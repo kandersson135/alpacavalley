@@ -3,6 +3,7 @@ let bgAudio = new Audio('audio/bg.ogg');
 let alpacaAudio = new Audio('audio/alpaca-noise4.mp3');
 let alpacaNoise = new Audio('audio/alpaca-noise3.mp3');
 let popAudio = new Audio('audio/pop.mp3');
+let thumpAudio = new Audio('audio/thump.mp3');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
 bgAudio.play();
@@ -11,6 +12,7 @@ alpacaAudio.loop = true;
 alpacaAudio.play();
 alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
+thumpAudio.volume = 0.8;
 
 //localStorage.removeItem('alpaca_save');
 
@@ -266,6 +268,57 @@ function addAlpaca(){
   S.herd++;
   displayAlpacas();
 }
+
+// spawn poop
+function spawnPoop() {
+  const container = $('#alpacaImagesContainer');
+  const containerWidth = container.width();
+  const containerHeight = container.height();
+
+  const poop = $('<img>');
+  poop.attr('src', 'img/poop.gif');
+  poop.addClass('poop');
+  poop.css({
+    width: '16px',
+    height: '16px',
+    position: 'absolute',
+    left: Math.random() * (containerWidth - 16) + 'px',
+    top: Math.random() * (containerHeight - 16) + 'px',
+    cursor: 'pointer'
+  });
+
+  // Click to clean up
+  poop.click(function() {
+    thumpAudio.play();
+    $(this).remove();
+    S.coins += 5;   // small coin reward
+    addExp(3);      // small exp reward
+    log("You cleaned up alpaca poop (+5 coins, +3 exp).");
+    autosave();
+  });
+
+  container.append(poop);
+}
+
+// Schedule poop spawns randomly
+setInterval(() => {
+  if (Math.random() < 0.3) { // 30% chance every check
+    spawnPoop();
+  }
+}, 20000); // check every 20s
+
+// Penalty if not removed
+setInterval(() => {
+  $('.poop').each(function() {
+    if (!$(this).data('spawnTime')) {
+      $(this).data('spawnTime', Date.now());
+    }
+    const age = Date.now() - $(this).data('spawnTime');
+    if (age > 15000) { // older than 15s
+      S.happiness = Math.max(0, S.happiness - 1);
+    }
+  });
+}, 5000);
 
 // Actions
 function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.'); autosave(); }
@@ -566,6 +619,24 @@ $(function(){
   // autosave every 10s
   if(autosaveTimer) clearInterval(autosaveTimer);
   autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
+});
+
+$('#mute-btn').click(function() {
+  if (bgAudio.muted) {
+    bgAudio.muted = false;
+    alpacaAudio.muted = false;
+    alpacaNoise.muted = false;
+    popAudio.muted = false;
+    thumpAudio.muted = false;
+    $(this).text('Sound off');
+  } else {
+    bgAudio.muted = true;
+    alpacaAudio.muted = true;
+    alpacaNoise.muted = true;
+    popAudio.muted = true;
+    thumpAudio.muted = true;
+    $(this).text('Sound on');
+  }
 });
 
 let isResetting = false;

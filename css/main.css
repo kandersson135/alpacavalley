@@ -91,7 +91,6 @@ body {
   font-size: 36px;
   margin: 0;
   margin-top: -8px;
-
   text-align: center;
 }
 
@@ -201,7 +200,7 @@ footer {
   justify-content: space-between;
   align-items: center;
   color: rgba(50, 50, 50, 0.4);
-  font-size: 10px;
+  font-size: 12px;
   font-family: "Gluten", cursive;
   font-weight: 300;
   padding: 0 10px;
@@ -255,10 +254,6 @@ footer a {
   border-radius: 8px;
   transition: all 0.05s ease-in-out;
 } */
-
-.leftSidebar button.btn:hover:not(:disabled) {
-
-}
 
 .leftSidebar button.btn:active {
   background: url("../img/Press-small-bar.png") no-repeat;
@@ -397,6 +392,14 @@ footer a {
   50% {
     transform: translateY(-5px);
   }
+}
+
+.poop {
+  image-rendering: pixelated;
+  transition: transform 0.2s ease;
+}
+.poop:hover {
+  transform: scale(1.2);
 }
 
 /* tooltip */
