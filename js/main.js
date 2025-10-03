@@ -46,7 +46,8 @@ const ACH_DEFS = [
 // New power-ups store
 const STORE = [
   {id:'double_wool', title:'Double Wool', cost:100, duration:30, apply: s=>({multWool:2})},
-  {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
+  //{id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
+  {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({})},
   {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
   {id:'coin_bonus', title:'Coin Bonus', cost:180, duration:30, apply: s=>({coinMult:2})},
   {id:'super_shear', title:'Super Shear', cost:250, duration:30, apply: s=>({shearMult:3})},
@@ -351,7 +352,17 @@ function upgradeBarn(){
   $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
 }
 
-function upgradeAuto(){ const cost = 800; if(S.coins < cost){ log('Not enough coins'); return; } S.coins -= cost; S.autoShear = true; log('You bought a shearing robot! Idle wool increased.'); autosave(); }
+function upgradeAuto() {
+  const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
+  if (S.coins < cost) {
+    log('Not enough coins');
+    return;
+  }
+  S.coins -= cost;
+  S.autoShearLevel = (S.autoShearLevel || 0) + 1;
+  log(`You bought a shearing robot! Idle wool increased (robots: ${S.autoShearLevel}).`);
+  autosave();
+}
 
 // Power-ups
 function buyPowerup(id){ const item = STORE.find(p=>p.id===id); if(!item) return; if(S.coins < item.cost){ log('Not enough coins for power-up.'); return; }
@@ -399,21 +410,24 @@ function tick(dtSec){
   // S.wool += amount;
 
   // No base idle wool, only auto systems
-  let rate = 0;
+  let rate = 0; // if you disabled natural idle wool
 
-  // Only add from autoShear upgrade or powerups
-  if(S.autoShear) rate += 0.5;
-  S.powerupsActive.forEach(p=>{
-    if(p.id==='double_wool') rate *= 2;
-    if(p.id==='auto_shear') rate += 1.0;
-    if(p.meta && p.meta.multWool) rate *= p.meta.multWool;
+  // permanent robots
+  if (S.autoShearLevel) {
+    rate += 0.5 * S.autoShearLevel; // each robot adds +0.5 wool/sec
+  }
+
+  // temporary auto-shear powerup
+  S.powerupsActive.forEach(p => {
+    if (p.id === 'auto_shear') rate += 1.0;  // adds on top of robots
+    if (p.id === 'double_wool') rate *= 2;
+    if (p.meta && p.meta.multWool) rate *= p.meta.multWool;
   });
-
-  $('#idleRate').attr('data-title', rate.toFixed(2) + "/s");
 
   const amount = rate * dtSec;
   S.wool += amount;
 
+  $('#idleRate').attr('data-title', rate.toFixed(2) + "/s");
 
   // NEW: Auto-Craft effect
   if (S.powerupsActive.some(p => p.id === 'auto_craft')) {
@@ -496,7 +510,7 @@ function updateUI(){
   const barnCost = 500 * S.barnLevel;
   $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
 
-  const autoCost = 800;
+  const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
   $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
   // update store
