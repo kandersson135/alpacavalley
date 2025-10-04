@@ -233,7 +233,7 @@ function displayAlpacas(){
 
       // Reduce happiness for stressing the alpaca
       S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
-      log("The alpaca got stressed! Happiness -3", "warning");
+      log("The alpaca got stressed! Happiness -3", "error");
 
       el.stop(true);
 
@@ -390,7 +390,7 @@ function spawnPoop() {
     $(this).remove();
     S.coins += 5;   // small coin reward
     addExp(3);      // small exp reward
-    log("You cleaned up alpaca poop (+5 coins, +3 exp).", "success");
+    log("You cleaned up alpaca poop (+5 coins, +3 exp).", "info");
     autosave();
   });
 
