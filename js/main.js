@@ -51,8 +51,8 @@ const STORE = [
   {id:'double_wool', title:'Double Wool', cost:100, duration:30, apply: s=>({multWool:2})},
   //{id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
   {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({})},
-  {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
   {id:'coin_bonus', title:'Coin Bonus', cost:180, duration:30, apply: s=>({coinMult:2})},
+  {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
   {id:'super_shear', title:'Super Shear', cost:250, duration:30, apply: s=>({shearMult:3})},
   {id:'auto_craft', title:'Auto-Craft', cost:300, duration:60, apply: s=>({autoCraft:true})}
 ];
@@ -89,9 +89,29 @@ function loadState(){
   return JSON.parse(JSON.stringify(defaultState));
 }
 
-function log(text){
+// function log(text){
+//   const time = new Date().toLocaleTimeString();
+//   $('#messageCenter').prepend(`<div class=\"logEntry\"><small class=\"logTimestamp\">[${time}]</small> ${text}</div>`);
+// }
+
+function log(text, type = "normal") {
   const time = new Date().toLocaleTimeString();
-  $('#messageCenter').prepend(`<div class=\"logEntry\"><small class=\"logTimestamp\">[${time}]</small> ${text}</div>`);
+
+  // Assign a CSS class based on the message type
+  let typeClass = "";
+  switch (type) {
+    case "success": typeClass = "log-success"; break;
+    case "warning": typeClass = "log-warning"; break;
+    case "error": typeClass = "log-error"; break;
+    case "info": typeClass = "log-info"; break;
+    default: typeClass = "log-normal"; break;
+  }
+
+  $('#messageCenter').prepend(`
+    <div class="logEntry ${typeClass}">
+      <small class="logTimestamp">[${time}]</small> ${text}
+    </div>
+  `);
 }
 
 // Experience & Leveling
@@ -101,7 +121,7 @@ function checkLevel(){
   let need = expToNext(S.level);
   while(S.exp >= need){
     S.exp -= need; S.level++; S.herd += 0; // maybe reward
-    log(`Farm leveled up! Now level ${S.level}`);
+    log(`Farm leveled up! Now level ${S.level}`, "success");
     grantCoins( Math.floor(50 * S.level) );
     need = expToNext(S.level);
     checkAllAch();
@@ -213,7 +233,7 @@ function displayAlpacas(){
 
       // Reduce happiness for stressing the alpaca
       S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
-      log("The alpaca got stressed! Happiness -3");
+      log("The alpaca got stressed! Happiness -3", "warning");
 
       el.stop(true);
 
@@ -264,10 +284,84 @@ function displayAlpacas(){
   $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
 }
 
-// Call this function whenever herd changes
-function addAlpaca(){
-  S.herd++;
-  displayAlpacas();
+function addSingleAlpaca() {
+  const container = $('#alpacaImagesContainer');
+  const containerWidth = container.width();
+  const containerHeight = container.height();
+  const randomIndex = Math.floor(Math.random() * alpacaImages.length);
+
+  const img = $('<img>');
+  img.attr('src', alpacaImages[randomIndex]);
+  img.css({
+    width: '29px',
+    height: '36px',
+    imageRendering: 'pixelated',
+    position: 'absolute',
+    left: Math.random() * (containerWidth - 48) + 'px',
+    top: Math.random() * (containerHeight - 48) + 'px',
+    transform: 'scaleX(1)'
+  });
+  container.append(img);
+
+  // --- Wandering logic (reuse your wander function)
+  function wander(el) {
+    function move() {
+      const currentLeft = parseFloat(el.css('left')) || 0;
+      const currentTop = parseFloat(el.css('top')) || 0;
+      const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 60);
+      const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 60);
+      const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
+      const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
+      if (deltaX > 0) el.css('transform', 'scaleX(1)');
+      else if (deltaX < 0) el.css('transform', 'scaleX(-1)');
+      const stepTime = 6000 + Math.random() * 4000;
+      el.animate({ left: newLeft + 'px', top: newTop + 'px' }, stepTime, 'linear', move);
+    }
+    move();
+  }
+
+  wander(img);
+
+  // --- Click behavior
+  img.click(function () {
+    const el = $(this);
+    const runDuration = 3000;
+    const startTime = Date.now();
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = 1;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
+
+    alpacaNoise.currentTime = 0;
+    alpacaNoise.play();
+    S.happiness = Math.max(0, S.happiness - 3);
+    log("The alpaca got stressed! Happiness -3", "warning");
+    el.stop(true);
+
+    function runAway() {
+      const elapsed = Date.now() - startTime;
+      if (elapsed >= runDuration) {
+        wander(el);
+        return;
+      }
+      const containerWidth = $('#alpacaImagesContainer').width();
+      const containerHeight = $('#alpacaImagesContainer').height();
+      let left = parseFloat(el.css('left')) || 0;
+      let top = parseFloat(el.css('top')) || 0;
+      let newLeft = left + vx;
+      let newTop = top + vy;
+      if (newLeft < 0 || newLeft > containerWidth - el.width()) {
+        newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
+      }
+      if (newTop < 0 || newTop > containerHeight - el.height()) {
+        newTop = Math.min(Math.max(newTop, 0), containerHeight - el.height());
+      }
+      el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
+      el.css({ left: newLeft + 'px', top: newTop + 'px' });
+      requestAnimationFrame(runAway);
+    }
+    runAway();
+  });
 }
 
 // spawn poop
@@ -296,7 +390,7 @@ function spawnPoop() {
     $(this).remove();
     S.coins += 5;   // small coin reward
     addExp(3);      // small exp reward
-    log("You cleaned up alpaca poop (+5 coins, +3 exp).");
+    log("You cleaned up alpaca poop (+5 coins, +3 exp).", "success");
     autosave();
   });
 
@@ -328,17 +422,17 @@ setInterval(() => {
 }, 5000);
 
 // Actions
-function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.'); autosave(); }
+function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.', "normal"); autosave(); }
 
 function feed() {
   if (S.coins >= 5) {
   addExp(2);
   S.happiness = Math.min(100, S.happiness + 8);
   S.coins -= 5;
-  log('You fed the herd (-5 coins).');
+  log('You fed the herd (-5 coins).', "normal");
   autosave();
   } else {
-  log("Not enough coins to feed the herd.");
+  log("Not enough coins to feed the herd.", "warning");
   }
 }
 
@@ -352,13 +446,13 @@ function shear(){
   const gained = Math.floor(base * mult);
   S.wool += gained;
   addExp(8 + Math.floor(gained/2));
-  log(`Sheared ${gained} wool.`);
+  log(`Sheared ${gained} wool.`, "normal");
   checkAllAch();
   autosave();
 }
 
 function craft(){
-  if(S.wool < 5){ log('Not enough wool to craft (needs 5).'); return; }
+  if(S.wool < 5){ log('Not enough wool to craft (needs 5).', "warning"); return; }
   S.wool -= 5;
   let sale = 20 + Math.floor(S.level*2);
 
@@ -368,26 +462,49 @@ function craft(){
     }
   });
 
-  S.coins += sale; addExp(6); log(`Crafted yarn and sold for ${sale} coins.`); checkAllAch(); autosave();
+  S.coins += sale; addExp(6); log(`Crafted yarn and sold for ${sale} coins.`, "normal"); checkAllAch(); autosave();
 }
 
-function buyAlpaca(){
-  const maxHerd = S.barnLevel * 5; // example cap
-  if(S.herd >= maxHerd){
-  log('Your barn is full! Upgrade to add more alpacas.');
-  return;
+// function buyAlpaca(){
+//   const maxHerd = S.barnLevel * 5; // example cap
+//   if(S.herd >= maxHerd){
+//   log('Your barn is full! Upgrade to add more alpacas.');
+//   return;
+//   }
+//   const cost = 200 * S.herd;
+//   if(S.coins < cost){
+//   log('Not enough coins to buy another alpaca.');
+//   return;
+//   }
+//   S.coins -= cost;
+//   S.herd++;
+//   log('You bought a new alpaca for your farm.');
+//   addExp(10);
+//   autosave();
+//   displayAlpacas(); // update visual display
+// }
+
+function buyAlpaca() {
+  const maxHerd = S.barnLevel * 5;
+  if (S.herd >= maxHerd) {
+    log('Your barn is full! Upgrade to add more alpacas.', "warning");
+    return;
   }
+
   const cost = 200 * S.herd;
-  if(S.coins < cost){
-  log('Not enough coins to buy another alpaca.');
-  return;
+  if (S.coins < cost) {
+    log('Not enough coins to buy another alpaca.', "warning");
+    return;
   }
+
   S.coins -= cost;
   S.herd++;
-  log('You bought a new alpaca for your farm.');
+  log('You bought a new alpaca for your farm.', "success");
   addExp(10);
   autosave();
-  displayAlpacas(); // update visual display
+
+  addSingleAlpaca(); // add only one new alpaca instead of reloading
+  $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
 }
 
 displayAlpacas();
@@ -399,12 +516,12 @@ displayAlpacas();
 function upgradeBarn(){
   const cost = 500 * S.barnLevel;
   if(S.coins < cost){
-  log('Not enough coins');
+  log('Not enough coins', "warning");
   return;
   }
   S.coins -= cost;
   S.barnLevel++;
-  log('Barn upgraded. Herd capacity increased.');
+  log('Barn upgraded. Herd capacity increased.', "success");
   autosave();
 
   // Update herd size display
@@ -415,19 +532,19 @@ function upgradeBarn(){
 function upgradeAuto() {
   const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
   if (S.coins < cost) {
-    log('Not enough coins');
+    log('Not enough coins', "warning");
     return;
   }
   S.coins -= cost;
   S.autoShearLevel = (S.autoShearLevel || 0) + 1;
-  log(`You bought a shearing robot! Idle wool increased (robots: ${S.autoShearLevel}).`);
+  log(`You bought a shearing robot! Idle wool increased (robots: ${S.autoShearLevel}).`, "success");
   autosave();
 }
 
 // Power-ups
-function buyPowerup(id){ const item = STORE.find(p=>p.id===id); if(!item) return; if(S.coins < item.cost){ log('Not enough coins for power-up.'); return; }
+function buyPowerup(id){ const item = STORE.find(p=>p.id===id); if(!item) return; if(S.coins < item.cost){ log('Not enough coins for power-up.', "warning"); return; }
   S.coins -= item.cost; const ends = Date.now() + item.duration*1000;
-  const instance = {id:item.id, ends:ends, meta:item.apply(S)}; S.powerupsActive.push(instance); S.powerupsUsed = (S.powerupsUsed||0)+1; log(`Activated power-up: ${item.title} (${item.duration}s)`);
+  const instance = {id:item.id, ends:ends, meta:item.apply(S)}; S.powerupsActive.push(instance); S.powerupsUsed = (S.powerupsUsed||0)+1; log(`Activated power-up: ${item.title} (${item.duration}s)`, "info");
   applyPowerupEffects(); checkAllAch(); autosave();
 }
 
@@ -602,7 +719,6 @@ function updateUI(){
       </div>
     `);
   });
-
 
   // list achievements
   $('#achList').empty();

@@ -301,6 +301,15 @@ footer a:hover {
   font-weight: 400;
 }
 
+.power {
+  image-rendering: pixelated;
+  transition: transform 0.2s ease;
+}
+
+.power:hover {
+  transform: scale(1.05);
+}
+
 .power img {
   height: 16px;
   position: relative;
@@ -353,6 +362,12 @@ footer a:hover {
 .logTimestamp {
   color: #999;
 }
+
+.log-normal { color: #393E46; }
+.log-success { color: #06d6a0; }     /* green for good events */
+.log-warning { color: #eCCD5A; }     /* yellow/orange for warnings */
+.log-error { color: #ff6b6b; }       /* red for errors */
+.log-info { color: #66aaff; }        /* blue for info */
 
 #alpacaImagesContainer {
   background: #c0d470 url("../img/grass.png") repeat;
