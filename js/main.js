@@ -302,7 +302,11 @@ function spawnPoop() {
 
 // Schedule poop spawns randomly
 setInterval(() => {
-  if (Math.random() < 0.3) { // 30% chance every check
+  // if (Math.random() < 0.3) { // 30% chance every check
+  //   spawnPoop();
+  // }
+
+  if (Math.random() < 0.1 * S.herd) { // with more alpacas, more chance of poop
     spawnPoop();
   }
 }, 20000); // check every 20s
@@ -569,16 +573,33 @@ function updateUI(){
   // update store
   $('#storeArea').empty();
   getAvailablePowerups().forEach(p=>{
-    const disabled = S.coins < p.cost ? 'opacity:0.6' : '';
+    // Check if active
+    const active = S.powerupsActive.find(x => x.id === p.id);
+
+    let buttonLabel = "Buy";
+    let disabled = "";
+
+    if (active) {
+      // Calculate remaining time in seconds
+      const remaining = Math.max(0, Math.ceil((active.ends - Date.now()) / 1000));
+      buttonLabel = remaining + "s left";
+      disabled = "opacity:0.6;pointer-events:none;";
+    } else if (S.coins < p.cost) {
+      disabled = "opacity:0.6;pointer-events:none;";
+    }
+
     $('#storeArea').append(`
-    <div class="power" style="${disabled}">
-      <div style="font-weight:700">${p.title}</div>
-      <small>Duration: ${p.duration}s</small>
-      <div style="margin-top:6px"><b>${p.cost} coins</b></div>
-      <div style="margin-top:6px"><button class="btn" data-buy="${p.id}">Buy</button></div>
-    </div>
+      <div class="power" style="${disabled}">
+        <div style="font-weight:700">${p.title}</div>
+        <small>Duration: ${p.duration}s</small>
+        <div style="margin-top:6px"><b><img src="img/Coin.png"> ${p.cost}</b></div>
+        <div style="margin-top:6px">
+          <button class="btn" data-buy="${p.id}" ${active ? 'disabled' : ''}>${buttonLabel}</button>
+        </div>
+      </div>
     `);
   });
+
 
   // list achievements
   $('#achList').empty();

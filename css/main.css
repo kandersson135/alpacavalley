@@ -43,21 +43,26 @@ body {
 }
 
 .statusBar ul {
-  margin-top: 5px;
+  margin-top: -4px;
 }
 
 .statusBar ul li {
-  display: inline;
+  display: inline-block;
   margin-right: 12px;
   font-weight: 500;
   font-size: 16px;
   color: #745573;
   font-family: "Gluten", cursive;
   border-radius: 50px;
-  padding: 15px 15px 10px 15px;
+  padding: 7px 15px 7px 15px;
   background: #fff7e4;
   border: 3px solid #745573;
   box-shadow: inset 0 -3px 0px #e5c8b6;
+  transition: transform 0.2s ease;
+}
+
+.statusBar ul li:hover {
+  transform: scale(1.08);
 }
 
 #woolDisplay {
@@ -92,12 +97,17 @@ body {
   margin: 0;
   margin-top: -8px;
   text-align: center;
+  transition: transform 0.2s ease;
 }
 
 .statusBar h1 a {
   color: #fff;
   text-shadow: 1px 1px 0px rgba(50, 50, 50, 0.2);
   text-decoration: none;
+}
+
+.statusBar h1:hover {
+  transform: scale(1.1);
 }
 
 #levelContainer {
@@ -209,6 +219,11 @@ footer {
 footer a {
   color: rgba(50, 50, 50, 0.4);
   text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+footer a:hover {
+  transform: scale(1.1);
 }
 
 .leftSidebar h3,
@@ -236,6 +251,7 @@ footer a {
   background-position: center;
   text-shadow: 0px 0px 1px rgba(50, 50, 50, 0.6);
   height: 50px;
+  transition: transform 0.2s ease;
 }
 
 /* .leftSidebar button.btn {
@@ -262,6 +278,10 @@ footer a {
   line-height: 40px !important;
 }
 
+.leftSidebar button.btn:hover {
+  transform: scale(1.1);
+}
+
 /* .leftSidebar button.btn:active {
   transform: translate(2px, 2px);
   box-shadow: none;
@@ -276,8 +296,14 @@ footer a {
   font-family: "Gluten", cursive;
   padding: 10px;
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
+}
+
+.power img {
+  height: 16px;
+  position: relative;
+  top: 3px;
 }
 
 .power button {
@@ -398,6 +424,7 @@ footer a {
   image-rendering: pixelated;
   transition: transform 0.2s ease;
 }
+
 .poop:hover {
   transform: scale(1.2);
 }
@@ -429,7 +456,7 @@ footer a {
   font-weight: 400;
 
   position: absolute;
-  bottom: 125%; /* show above */
+  bottom: 115%; /* show above */
   left: 50%;
   transform: translateX(-50%);
   transition: opacity 0.3s;
@@ -449,6 +476,7 @@ footer a {
 }
 
 #idleRate.tooltip::after {
-  bottom: auto;
-  top: 125%;
+  bottom: 2%;
+  left: -42%;
+  font-size: 14px;
 }
