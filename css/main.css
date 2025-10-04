@@ -210,15 +210,15 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: rgba(50, 50, 50, 0.4);
+  color: rgba(50, 50, 50, 0.3);
   font-size: 12px;
   font-family: "Open Sans", sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   padding: 0 10px;
 }
 
 footer a {
-  color: rgba(50, 50, 50, 0.4);
+  color: rgba(50, 50, 50, 0.3);
   text-decoration: none;
   transition: transform 0.2s ease;
 }
