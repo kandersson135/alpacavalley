@@ -4,6 +4,7 @@ let alpacaAudio = new Audio('audio/alpaca-noise4.mp3');
 let alpacaNoise = new Audio('audio/alpaca-noise3.mp3');
 let popAudio = new Audio('audio/pop.mp3');
 let thumpAudio = new Audio('audio/thump.mp3');
+let pootAudio = new Audio('audio/poot.mp3');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
 bgAudio.play();
@@ -12,7 +13,7 @@ alpacaAudio.loop = true;
 alpacaAudio.play();
 alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
-thumpAudio.volume = 0.8;
+pootAudio.volume = 0.3;
 
 //localStorage.removeItem('alpaca_save');
 
@@ -274,6 +275,8 @@ function spawnPoop() {
   const container = $('#alpacaImagesContainer');
   const containerWidth = container.width();
   const containerHeight = container.height();
+
+  pootAudio.play();
 
   const poop = $('<img>');
   poop.attr('src', 'img/poop.gif');
@@ -649,6 +652,7 @@ $('#mute-btn').click(function() {
     alpacaNoise.muted = false;
     popAudio.muted = false;
     thumpAudio.muted = false;
+    pootAudio.muted = false;
     $(this).text('Sound off');
   } else {
     bgAudio.muted = true;
@@ -656,6 +660,7 @@ $('#mute-btn').click(function() {
     alpacaNoise.muted = true;
     popAudio.muted = true;
     thumpAudio.muted = true;
+    pootAudio.muted = true;
     $(this).text('Sound on');
   }
 });

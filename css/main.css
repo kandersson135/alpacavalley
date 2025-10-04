@@ -24,7 +24,7 @@ body {
 .parent {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: 55px repeat(4, 1fr); /* first row 20px, others share remaining space */
+    grid-template-rows: 55px 250px repeat(3, 1fr); /* first row 20px, others share remaining space */
     gap: 0px;
     width: 100vw;
     height: 100vh;
@@ -35,7 +35,7 @@ body {
     grid-column: span 5 / span 5;
     background-color: #d4a373;
     background-color: #bb8754;
-    /* background-image: url("data:image/svg+xml,%3Csvg width='84' height='16' viewBox='0 0 84 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M78 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM30 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM10 0h2v16h-2V0zm6 0h4v16h-4V0zM2 0h4v16H2V0zm50 0h2v16h-2V0zM38 0h2v16h-2V0zm28 0h2v16h-2V0zm-8 0h6v16h-6V0zM42 0h6v16h-6V0z' fill='%23c9915b' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E"); */
+    background-image: url("data:image/svg+xml,%3Csvg width='84' height='16' viewBox='0 0 84 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M78 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM30 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM10 0h2v16h-2V0zm6 0h4v16h-4V0zM2 0h4v16H2V0zm50 0h2v16h-2V0zM38 0h2v16h-2V0zm28 0h2v16h-2V0zm-8 0h6v16h-6V0zM42 0h6v16h-6V0z' fill='%23c9915b' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
     border-bottom: 2px solid rgba(50, 50, 50, 0.2);
     padding: 10px;
     display: flex;
@@ -328,7 +328,8 @@ footer a:hover {
 }
 
 #messageCenter {
-  height: 93%;
+  border-top: 2px solid rgba(50, 50, 50, 0.2);
+  height: 91%;
   overflow-y: auto;
   display: flex;
   padding: 10px;
@@ -366,9 +367,7 @@ footer a:hover {
   height: 100%; /* adjust as needed */
   position: relative;
   overflow: hidden;
-  border: 16px solid #e6ccb2;
-  border-top-color: #ede0d4;
-  border-bottom-color: #ede0d4;
+
   /* border: 16px solid #eee;
   border-top-color: #fff;
   border-bottom-color: #fff; */
@@ -382,24 +381,10 @@ footer a:hover {
   left: 0;
   width: 100%;
   height: 100%;
-
-  /* Transparent glass look */
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  /* Light reflection (subtle gradient) */
-
-
-  background: linear-gradient(
-     145deg,
-     rgba(255, 255, 255, 0.25) 0%,
-     rgba(255, 255, 255, 0.05) 40%,
-     rgba(255, 255, 255, 0) 100%
-   );
-
-  /* Depth */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
+  background-image: url("../img/fence.png");
+  background-position: bottom;
+  background-repeat: repeat-x;
+  background-size: 64px;
   pointer-events: none;
 }
 
