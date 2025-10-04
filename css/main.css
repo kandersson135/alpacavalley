@@ -405,6 +405,10 @@ footer a:hover {
 
 #alpacaImagesContainer img {
   cursor: url("../img/hand-cursor.png") 4 4, auto !important;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .alpaca-anim {
