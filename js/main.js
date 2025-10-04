@@ -335,7 +335,7 @@ function addSingleAlpaca() {
     alpacaNoise.currentTime = 0;
     alpacaNoise.play();
     S.happiness = Math.max(0, S.happiness - 3);
-    log("The alpaca got stressed! Happiness -3", "warning");
+    log("The alpaca got stressed! Happiness -3", "error");
     el.stop(true);
 
     function runAway() {
