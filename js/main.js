@@ -16,7 +16,26 @@ alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
 pootAudio.volume = 0.3;
 
-//localStorage.removeItem('alpaca_save');
+// Function to detect Chrome/Edge
+function isChromiumBased() {
+  const ua = navigator.userAgent;
+  return /Chrome/.test(ua) && !/OPR|Edg|Edge|Brave/.test(ua) ? 'chrome' :
+         /Edg|Edge/.test(ua) ? 'edge' : false;
+}
+
+// On page load
+$(window).on('load', function() {
+  const browser = isChromiumBased();
+  if (browser) {
+    log('🔊 Click anywhere to enable sound.', "info");
+  }
+});
+
+// Click handler for playing audio
+$(document).one('click', function() {
+  if (bgAudio.paused) bgAudio.play().catch(err => console.log(err));
+  if (alpacaAudio.paused) alpacaAudio.play().catch(err => console.log(err));
+});
 
 // Attach event to all buttons
 $(document).on("mousedown", "button", function() {
@@ -83,7 +102,7 @@ function loadState(){
     if(raw){
       const parsed = JSON.parse(raw);
       // migrate defaults
-      log('Game loaded from last save.');
+      log('Game loaded from last save.', "normal");
       return Object.assign({}, defaultState, parsed);
     }
   }catch(e){console.error(e)}
