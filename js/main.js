@@ -414,15 +414,28 @@ function spawnPoop() {
 }
 
 // Schedule poop spawns randomly
-setInterval(() => {
-  // if (Math.random() < 0.3) { // 30% chance every check
-  //   spawnPoop();
-  // }
+// setInterval(() => {
+//   if (Math.random() < 0.3) { // 30% chance every check
+//     spawnPoop();
+//   }
+//
+//   // if (Math.random() < 0.1 * S.herd) { // with more alpacas, more chance of poop
+//   //   spawnPoop();
+//   // }
+// }, 20000); // check every 20s
 
-  if (Math.random() < 0.1 * S.herd) { // with more alpacas, more chance of poop
+function randomPoopSpawn() {
+  if (Math.random() < 0.3) { // 30% chance
     spawnPoop();
   }
-}, 20000); // check every 20s
+
+  // Random delay between 10s and 30s before next check
+  const nextDelay = 10000 + Math.random() * 20000;
+  setTimeout(randomPoopSpawn, nextDelay);
+}
+
+// Start it once
+randomPoopSpawn();
 
 // Penalty if not removed
 setInterval(() => {
