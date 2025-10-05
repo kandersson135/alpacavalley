@@ -828,6 +828,7 @@ $('#mute-btn').click(function() {
     popAudio.muted = false;
     thumpAudio.muted = false;
     pootAudio.muted = false;
+    spawnAudio.muted = false;
     $(this).text('Sound off');
   } else {
     bgAudio.muted = true;
@@ -836,6 +837,7 @@ $('#mute-btn').click(function() {
     popAudio.muted = true;
     thumpAudio.muted = true;
     pootAudio.muted = true;
+    spawnAudio.muted = true;
     $(this).text('Sound on');
   }
 });
