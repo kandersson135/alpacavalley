@@ -5,6 +5,7 @@ let alpacaNoise = new Audio('audio/alpaca-noise3.mp3');
 let popAudio = new Audio('audio/pop.mp3');
 let thumpAudio = new Audio('audio/thump.mp3');
 let pootAudio = new Audio('audio/poot.mp3');
+let spawnAudio = new Audio('audio/spawn.wav');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
 bgAudio.play();
@@ -95,9 +96,9 @@ function loadState(){
 // }
 
 function log(text, type = "normal") {
+  const container = $('#messageCenter');
   const time = new Date().toLocaleTimeString();
 
-  // Assign a CSS class based on the message type
   let typeClass = "";
   switch (type) {
     case "success": typeClass = "log-success"; break;
@@ -107,11 +108,14 @@ function log(text, type = "normal") {
     default: typeClass = "log-normal"; break;
   }
 
-  $('#messageCenter').prepend(`
+  container.prepend(`
     <div class="logEntry ${typeClass}">
       <small class="logTimestamp">[${time}]</small> ${text}
     </div>
   `);
+
+  // Always scroll to top (newest message)
+  container.scrollTop(0);
 }
 
 // Experience & Leveling
@@ -233,7 +237,7 @@ function displayAlpacas(){
 
       // Reduce happiness for stressing the alpaca
       S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
-      log("The alpaca got stressed! Happiness -3", "error");
+      log("The alpaca got stressed! Happiness -3", "warning");
 
       el.stop(true);
 
@@ -301,7 +305,9 @@ function addSingleAlpaca() {
     top: Math.random() * (containerHeight - 48) + 'px',
     transform: 'scaleX(1)'
   });
-  container.append(img);
+  //container.append(img);
+
+  spawnAudio.play();
 
   // --- Wandering logic (reuse your wander function)
   function wander(el) {
@@ -320,7 +326,17 @@ function addSingleAlpaca() {
     move();
   }
 
-  wander(img);
+  // spawn animation - drop drom top
+  const spawnY = -40; // start slightly above container
+  const targetTop = Math.random() * (containerHeight - 48);
+  img.css({ top: spawnY + 'px', opacity: 0 });
+  container.append(img);
+  img.animate(
+    { top: targetTop + 'px', opacity: 1 },
+    { duration: 800, easing: 'swing', complete: () => wander(img) }
+  );
+
+  //wander(img);
 
   // --- Click behavior
   img.click(function () {
@@ -335,7 +351,7 @@ function addSingleAlpaca() {
     alpacaNoise.currentTime = 0;
     alpacaNoise.play();
     S.happiness = Math.max(0, S.happiness - 3);
-    log("The alpaca got stressed! Happiness -3", "error");
+    log("The alpaca got stressed! Happiness -3", "warning");
     el.stop(true);
 
     function runAway() {
@@ -388,9 +404,9 @@ function spawnPoop() {
   poop.click(function() {
     thumpAudio.play();
     $(this).remove();
-    S.coins += 5;   // small coin reward
-    addExp(3);      // small exp reward
-    log("You cleaned up alpaca poop (+5 coins, +3 exp).", "info");
+    S.coins += 100;   // small coin reward
+    addExp(5);      // small exp reward
+    log("You cleaned up alpaca poop (+100 coins, +5 exp).", "info");
     autosave();
   });
 
@@ -417,6 +433,7 @@ setInterval(() => {
     const age = Date.now() - $(this).data('spawnTime');
     if (age > 15000) { // older than 15s
       S.happiness = Math.max(0, S.happiness - 1);
+      $(this).remove();
     }
   });
 }, 5000);
@@ -432,7 +449,7 @@ function feed() {
   log('You fed the herd (-5 coins).', "normal");
   autosave();
   } else {
-  log("Not enough coins to feed the herd.", "warning");
+  log("Not enough coins to feed the herd.", "error");
   }
 }
 
@@ -452,7 +469,7 @@ function shear(){
 }
 
 function craft(){
-  if(S.wool < 5){ log('Not enough wool to craft (needs 5).', "warning"); return; }
+  if(S.wool < 5){ log('Not enough wool to craft (needs 5).', "error"); return; }
   S.wool -= 5;
   let sale = 20 + Math.floor(S.level*2);
 
@@ -487,13 +504,13 @@ function craft(){
 function buyAlpaca() {
   const maxHerd = S.barnLevel * 5;
   if (S.herd >= maxHerd) {
-    log('Your barn is full! Upgrade to add more alpacas.', "warning");
+    log('Your barn is full! Upgrade to add more alpacas.', "error");
     return;
   }
 
   const cost = 200 * S.herd;
   if (S.coins < cost) {
-    log('Not enough coins to buy another alpaca.', "warning");
+    log('Not enough coins to buy another alpaca.', "error");
     return;
   }
 
@@ -516,7 +533,7 @@ displayAlpacas();
 function upgradeBarn(){
   const cost = 500 * S.barnLevel;
   if(S.coins < cost){
-  log('Not enough coins', "warning");
+  log('Not enough coins', "error");
   return;
   }
   S.coins -= cost;
@@ -532,7 +549,7 @@ function upgradeBarn(){
 function upgradeAuto() {
   const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
   if (S.coins < cost) {
-    log('Not enough coins', "warning");
+    log('Not enough coins', "error");
     return;
   }
   S.coins -= cost;
@@ -542,7 +559,7 @@ function upgradeAuto() {
 }
 
 // Power-ups
-function buyPowerup(id){ const item = STORE.find(p=>p.id===id); if(!item) return; if(S.coins < item.cost){ log('Not enough coins for power-up.', "warning"); return; }
+function buyPowerup(id){ const item = STORE.find(p=>p.id===id); if(!item) return; if(S.coins < item.cost){ log('Not enough coins for power-up.', "error"); return; }
   S.coins -= item.cost; const ends = Date.now() + item.duration*1000;
   const instance = {id:item.id, ends:ends, meta:item.apply(S)}; S.powerupsActive.push(instance); S.powerupsUsed = (S.powerupsUsed||0)+1; log(`Activated power-up: ${item.title} (${item.duration}s)`, "info");
   applyPowerupEffects(); checkAllAch(); autosave();
