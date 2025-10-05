@@ -445,7 +445,7 @@ setInterval(() => {
     }
     const age = Date.now() - $(this).data('spawnTime');
     if (age > 15000) { // older than 15s
-      S.happiness = Math.max(0, S.happiness - 1);
+      S.happiness = Math.max(0, S.happiness - 5);
       $(this).remove();
     }
   });
