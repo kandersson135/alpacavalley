@@ -453,17 +453,54 @@ function feed() {
   }
 }
 
-function shear(){
-  const base = 1 + Math.floor(S.herd * 0.8) + Math.floor(S.level/2);
+// function shear(){
+//   const base = 1 + Math.floor(S.herd * 0.8) + Math.floor(S.level/2);
+//   let mult = 1;
+//   S.powerupsActive.forEach(p=>{
+//     if(p.id==='double_wool' && p.meta && p.meta.multWool) mult *= p.meta.multWool;
+//     if(p.id==='super_shear' && p.meta && p.meta.shearMult) mult *= p.meta.shearMult;
+//   });
+//   const gained = Math.floor(base * mult);
+//   S.wool += gained;
+//   addExp(8 + Math.floor(gained/2));
+//   log(`Sheared ${gained} wool.`, "normal");
+//   checkAllAch();
+//   autosave();
+// }
+
+function shear() {
+  const base = 1 + Math.floor(S.herd * 0.8) + Math.floor(S.level / 2);
   let mult = 1;
-  S.powerupsActive.forEach(p=>{
-    if(p.id==='double_wool' && p.meta && p.meta.multWool) mult *= p.meta.multWool;
-    if(p.id==='super_shear' && p.meta && p.meta.shearMult) mult *= p.meta.shearMult;
+
+  // Apply power-up effects
+  S.powerupsActive.forEach(p => {
+    if (p.id === 'double_wool' && p.meta && p.meta.multWool) mult *= p.meta.multWool;
+    if (p.id === 'super_shear' && p.meta && p.meta.shearMult) mult *= p.meta.shearMult;
   });
+
+  // --- Happiness effect ---
+  // Happiness (0–100) directly affects wool yield, with 50% min efficiency.
+  // At 100% happiness → full yield, at 0% happiness → 50% yield.
+
+  //const happinessFactor = 0.5 + (S.happiness / 200);
+  const happinessFactor = 0.75 + (S.happiness / 100) * 0.75;
+  mult *= happinessFactor;
+
   const gained = Math.floor(base * mult);
   S.wool += gained;
-  addExp(8 + Math.floor(gained/2));
+
+  // --- Pick emoji based on happiness ---
+  let moodEmoji = "😐";
+  if (S.happiness > 80) moodEmoji = "🥰";
+  else if (S.happiness > 50) moodEmoji = "😊";
+  else if (S.happiness > 25) moodEmoji = "😟";
+  else moodEmoji = "😢";
+
+  // Experience and logging
+  addExp(8 + Math.floor(gained / 2));
+  // log(`Sheared ${gained} wool ${moodEmoji} (${Math.round(happinessFactor * 100)}% efficiency).`, "normal");
   log(`Sheared ${gained} wool.`, "normal");
+
   checkAllAch();
   autosave();
 }
