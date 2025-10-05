@@ -690,41 +690,82 @@ function updateUI(){
   const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
   $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
-  // update store
-  $('#storeArea').empty();
-  getAvailablePowerups().forEach(p=>{
-    // Check if active
-    const active = S.powerupsActive.find(x => x.id === p.id);
-
-    let buttonLabel = "Buy";
-    let disabled = "";
-
-    if (active) {
-      // Calculate remaining time in seconds
-      const remaining = Math.max(0, Math.ceil((active.ends - Date.now()) / 1000));
-      buttonLabel = remaining + "s left";
-      disabled = "opacity:0.6;pointer-events:none;";
-    } else if (S.coins < p.cost) {
-      disabled = "opacity:0.6;pointer-events:none;";
-    }
-
-    $('#storeArea').append(`
-      <div class="power" style="${disabled}">
-        <div style="font-weight:700">${p.title}</div>
-        <small>Duration: ${p.duration}s</small>
-        <div style="margin-top:6px"><b><img src="img/Coin.png"> ${p.cost}</b></div>
-        <div style="margin-top:6px">
-          <button class="btn" data-buy="${p.id}" ${active ? 'disabled' : ''}>${buttonLabel}</button>
-        </div>
-      </div>
-    `);
-  });
+  updateStoreUI();
 
   // list achievements
   $('#achList').empty();
   ACH_DEFS.forEach(a=>{
     const unlocked = !!S.achievements[a.id];
     $('#achList').append(`<div class=\"ach\">${unlocked?'<b>✓</b> ':'<small>•</small> '}<b>${a.title}</b> — <span class=\"muted\">${a.desc}</span></div>`);
+  });
+}
+
+// call once on page load to create the store DOM (one-time)
+function initStoreUI(){
+  const store = $('#storeArea');
+  store.empty();
+
+  // create one card for every power-up in STORE (we'll show/hide by availability)
+  STORE.forEach(p=>{
+    const $card = $(`
+      <div class="power" data-id="${p.id}">
+        <div style="font-weight:700">${p.title}</div>
+        <small>Duration: ${p.duration}s</small>
+        <div style="margin-top:6px"><b><img src="img/Coin.png"> <span class="powerCost">${p.cost}</span></b></div>
+        <div style="margin-top:6px">
+          <button class="btn powerBuyBtn" data-buy="${p.id}"><span class="btnLabel">Buy</span></button>
+        </div>
+      </div>
+    `);
+    store.append($card);
+  });
+
+  // set initial state
+  updateStoreUI();
+}
+
+// called often (e.g. from updateUI), updates labels/disabled state WITHOUT rebuilding DOM
+function updateStoreUI(){
+  const availableIds = getAvailablePowerups().map(x => x.id);
+
+  STORE.forEach(p=>{
+    const $card = $(`#storeArea .power[data-id="${p.id}"]`);
+    if($card.length === 0) return;
+
+    // show or hide based on availability (level / unlocks)
+    const isAvailable = availableIds.includes(p.id);
+    if(!isAvailable){
+      $card.hide();
+      return;
+    } else {
+      $card.show();
+    }
+
+    // update cost (in case you scale it)
+    $card.find('.powerCost').text(p.cost);
+
+    // active?
+    const active = S.powerupsActive.find(x => x.id === p.id);
+
+    const $btn = $card.find('button[data-buy]');
+    const $label = $btn.find('.btnLabel');
+
+    if(active && active.ends){
+      const remaining = Math.max(0, Math.ceil((active.ends - Date.now()) / 1000));
+      $label.text(remaining > 0 ? `${remaining}s left` : 'Buy');
+      $btn.prop('disabled', true);
+      $card.css({'opacity':'0.6','pointer-events':'none'});
+    } else {
+      // not active -> set buy label and disable if unaffordable
+      $label.text('Buy');
+      const affordable = S.coins >= p.cost;
+      $btn.prop('disabled', !affordable);
+      if(!affordable){
+        $card.css({'opacity':'0.6','pointer-events':'none'});
+      } else {
+        $card.css({'opacity':'','pointer-events':''});
+      }
+    }
   });
 }
 
@@ -742,6 +783,7 @@ setInterval(()=>{ applyPowerupEffects(); }, 2000);
 // UI wiring
 $(function(){
   updateUI();
+  initStoreUI();
   // attach buttons
   $('#petBtn').click(()=>{ pet(); updateUI(); });
   $('#feedBtn').click(()=>{ feed(); updateUI(); });
