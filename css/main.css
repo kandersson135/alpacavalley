@@ -5,13 +5,13 @@
 html, body {
     height: 100%;
     margin: 0;
-    cursor: url("../img/pointer-cursor.png") 4 4, auto;
+    cursor: url("../img/misc/pointer-cursor.png") 4 4, auto;
 }
 
 button,
 .statusBar a,
 footer a {
-  cursor: url("../img/hand-cursor.png") 4 4, auto !important;
+  cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
 }
 
 body {
@@ -111,21 +111,6 @@ body {
 
 .statusBar h1:hover {
   transform: scale(1.1);
-}
-
-#achBtn {
-  background: url("../img/trophy.png") no-repeat;
-  background-size: contain;
-  border: none;
-  height: 40px;
-  text-indent: -9999px;
-  margin-top: -2px;
-  width: 40px;
-}
-
-#achBtn:active {
-  background: url("../img/trophy-pressed.png") no-repeat;
-  background-size: contain;
 }
 
 #levelContainer {
@@ -235,16 +220,6 @@ footer {
   padding: 0 10px;
 }
 
-footer a {
-  color: rgba(50, 50, 50, 0.3);
-  text-decoration: none;
-  transition: transform 0.2s ease;
-}
-
-footer a:hover {
-  transform: scale(1.1);
-}
-
 .leftSidebar h3,
 .rightSidebar h3 {
   color: #fff;
@@ -265,7 +240,7 @@ footer a:hover {
   font-size: 18px;
   font-family: "Gluten", cursive;
   cursor: pointer;
-  background: url("../img/Small-bar.png") no-repeat;
+  background: url("../img/buttons/small-bar.png") no-repeat;
   background-size: contain;
   background-position: center;
   text-shadow: 0px 0px 1px rgba(50, 50, 50, 0.6);
@@ -291,7 +266,7 @@ footer a:hover {
 } */
 
 .leftSidebar button.btn:active {
-  background: url("../img/Press-small-bar.png") no-repeat;
+  background: url("../img/buttons/small-bar-pressed.png") no-repeat;
   background-size: contain;
   background-position: center;
   line-height: 40px !important;
@@ -355,6 +330,81 @@ footer a:hover {
   box-shadow: none;
 }
 
+/* rightSidebar menu */
+.rightSidebar ul {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+.rightSidebar ul li {
+  display: inline;
+  margin-left: 5px;
+}
+
+.rightSidebar ul li a {
+  border: none;
+  display: inline-block;
+  height: 48px;
+  text-indent: -9999px !important;
+  margin-top: -2px;
+  width: 48px;
+  transition: transform 0.2s ease;
+}
+
+.rightSidebar ul li a:hover {
+  transform: scale(1.1);
+}
+
+.rightSidebar ul li:first-child a {
+  background: url("../img/buttons/trophy.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:first-child a:active {
+  background: url("../img/buttons/trophy-pressed.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(2) a {
+  background: url("../img/buttons/sound-on.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(2) a:active {
+  background: url("../img/buttons/sound-on-pressed.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(3) a {
+  background: url("../img/buttons/about.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(3) a:active {
+  background: url("../img/buttons/about-pressed.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(4) a {
+  background: url("../img/buttons/reset.png") no-repeat;
+  background-size: contain;
+}
+
+.rightSidebar ul li:nth-child(4) a:active {
+  background: url("../img/buttons/reset-pressed.png") no-repeat;
+  background-size: contain;
+}
+
+.sound-off {
+  background: url("../img/buttons/sound-off.png") no-repeat !important;
+  background-size: contain !important;
+}
+
+.sound-off:active {
+  background: url("../img/buttons/sound-off-pressed.png") no-repeat !important;
+  background-size: contain !important;
+}
+
 #messageCenter {
   border-top: 2px solid rgba(50, 50, 50, 0.2);
   height: 91%;
@@ -388,7 +438,7 @@ footer a:hover {
 .log-info { color: #66aaff; }        /* blue for info */
 
 #alpacaImagesContainer {
-  background: #c0d470 url("../img/grass.png") repeat;
+  background: #c0d470 url("../img/misc/grass.png") repeat;
   background-size: auto;
 
   background-color: #b0eb93;
@@ -416,7 +466,7 @@ footer a:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../img/fence.png");
+  background-image: url("../img/misc/fence.png");
   background-position: bottom;
   background-repeat: repeat-x;
   background-size: 64px;
@@ -424,7 +474,7 @@ footer a:hover {
 }
 
 #alpacaImagesContainer img {
-  cursor: url("../img/hand-cursor.png") 4 4, auto !important;
+  cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
   -webkit-user-drag: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -505,3 +555,103 @@ footer a:hover {
   left: -42%;
   font-size: 14px;
 }
+
+/* Achievements */
+#achList {
+  text-align: left;
+}
+
+/* Base list styles */
+.ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Scroll container styling (applied to wrapper) */
+.swal-content > div {
+  scrollbar-width: thin;
+  scrollbar-color: #aaa #f1f1f1;
+}
+
+/* Chrome/Edge scrollbar styling */
+.swal-content > div::-webkit-scrollbar {
+  width: 8px;
+}
+.swal-content > div::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.swal-content > div::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 4px;
+}
+
+/* Achievements */
+.ach {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  transition: background 0.2s;
+}
+.ach.unlocked {
+  background: #e6ffe6;
+  border-left: 4px solid #4caf50;
+}
+.ach.locked {
+  opacity: 0.6;
+  border-left: 4px solid #ccc;
+}
+.ach-icon {
+  font-size: 1.4em;
+  width: 24px;
+  text-align: center;
+}
+.ach-text {
+  flex: 1;
+}
+.muted {
+  color: #777;
+  font-size: 0.9em;
+}
+
+/* MODAL BOX */
+.swal-modal {
+  background: #fff7e4;
+  border: 4px solid #6c5671;
+  border-radius: 14px;
+  box-shadow: inset 0 -4px 0 #dcc7b5;
+  color: #6c5671;
+  font-family: "Gluten", cursive;
+}
+
+.swal-title {
+  color: #6c5671;
+  font-weight: 600;
+  margin-top: 0px !important;
+}
+
+.swal-text {
+  color: #6c5671;
+  font-size: 18px;
+}
+
+.swal-button {
+	background: #b0eb93;
+  border: 2px solid #6c5671;
+  border-radius: 8px;
+  box-shadow: inset 0 -2px 0 #8fb58b;
+  font-family: "Gluten", cursive;
+  color:#fff;
+  font-weight:normal;
+  font-size:18px;
+  padding:5px 20px;
+  text-shadow: 0px 0px 1px rgba(50, 50, 50, 0.6);
+  transition: transform 0.2s ease;
+}
+.swal-button:focus {box-shadow: inset 0 -2px 0 #8fb58b;}
+.swal-button:hover {background:#b0eb93 !important; transform: scale(1.08);}
+.swal-button:active {background:#b0eb93; box-shadow:none; position:relative; top:2px;}

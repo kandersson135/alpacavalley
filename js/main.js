@@ -38,7 +38,7 @@ $(document).one('click', function() {
 });
 
 // Attach event to all buttons
-$(document).on("mousedown", "button", function() {
+$(document).on("mousedown", "button, a", function() {
   // Reset sound to start (in case it overlaps)
   popAudio.currentTime = 0;
   popAudio.play();
@@ -408,7 +408,7 @@ function spawnPoop() {
   pootAudio.play();
 
   const poop = $('<img>');
-  poop.attr('src', 'img/poop.gif');
+  poop.attr('src', 'img/misc/poop.gif');
   poop.addClass('poop');
   poop.css({
     width: '16px',
@@ -454,7 +454,9 @@ function randomPoopSpawn() {
 }
 
 // Start it once
-randomPoopSpawn();
+$(document).ready(() => {
+  setTimeout(randomPoopSpawn, 5000); // wait 5s before first chance
+});
 
 // Penalty if not removed
 setInterval(() => {
@@ -762,6 +764,7 @@ function updateUI(){
   $('#happyDisplay').text(Math.floor(S.happiness) + '%');
   //$('#herdSize').text(S.herd);
   //$('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
+  $('#versionDisplay').text("Version: 0.0.8");
   $('#timeDisplay').text(new Date().toLocaleString());
 
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
@@ -777,13 +780,6 @@ function updateUI(){
   $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
   updateStoreUI();
-
-  // list achievements
-  $('#achList').empty();
-  ACH_DEFS.forEach(a=>{
-    const unlocked = !!S.achievements[a.id];
-    $('#achList').append(`<div class=\"ach\">${unlocked?'<b>✓</b> ':'<small>•</small> '}<b>${a.title}</b> — <span class=\"muted\">${a.desc}</span></div>`);
-  });
 }
 
 // call once on page load to create the store DOM (one-time)
@@ -797,7 +793,7 @@ function initStoreUI(){
       <div class="power" data-id="${p.id}">
         <div style="font-weight:700">${p.title}</div>
         <small>Duration: ${p.duration}s</small>
-        <div style="margin-top:6px"><b><img src="img/Coin.png"> <span class="powerCost">${p.cost}</span></b></div>
+        <div style="margin-top:6px"><b><img src="img/icons/coin.png"> <span class="powerCost">${p.cost}</span></b></div>
         <div style="margin-top:6px">
           <button class="btn powerBuyBtn" data-buy="${p.id}"><span class="btnLabel">Buy</span></button>
         </div>
@@ -889,6 +885,7 @@ $(function(){
   autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
 });
 
+// Sound button
 $('#mute-btn').click(function() {
   if (bgAudio.muted) {
     bgAudio.muted = false;
@@ -898,7 +895,8 @@ $('#mute-btn').click(function() {
     thumpAudio.muted = false;
     pootAudio.muted = false;
     spawnAudio.muted = false;
-    $(this).text('Sound off');
+    $(this).removeClass('sound-off');
+    //$(this).text('Sound off');
   } else {
     bgAudio.muted = true;
     alpacaAudio.muted = true;
@@ -907,23 +905,88 @@ $('#mute-btn').click(function() {
     thumpAudio.muted = true;
     pootAudio.muted = true;
     spawnAudio.muted = true;
-    $(this).text('Sound on');
+    $(this).addClass('sound-off');
+    //$(this).text('Sound on');
   }
 });
 
+// Achievements button
+function buildAchievementList() {
+  // Create a wrapper div with a fixed height and scroll
+  const wrapper = document.createElement('div');
+  wrapper.style.maxHeight = '300px';   // adjust as needed
+  wrapper.style.overflowY = 'auto';
+  wrapper.style.paddingRight = '6px';  // prevent scrollbar overlap
+
+  const $list = $('<div id="achList" class="ach-list"></div>').appendTo(wrapper);
+
+  ACH_DEFS.forEach(a => {
+    const unlocked = !!S.achievements[a.id];
+    $list.append(`
+      <div class="ach ${unlocked ? 'unlocked' : 'locked'}">
+        <span class="ach-icon">
+          ${unlocked ? '🏆' : '🔒'}
+        </span>
+        <div class="ach-text">
+          <b>${a.title}</b><br>
+          <span class="muted">${a.desc}</span>
+        </div>
+      </div>
+    `);
+  });
+
+  return wrapper;
+}
+
+$('#achiev-btn').click(function() {
+  swal({
+    title: 'Achievements',
+    content: buildAchievementList(),
+    button: 'Close',
+  });
+});
+
+// About button
+$('#about-btn').click(function() {
+  swal({
+  title: 'About Alpaca Valley',
+  text: `Welcome to Alpaca Valley — a cozy little world full of fluffy friends!
+
+  This game was created by Kim Andersson as a passion project combining chill gameplay, cute aesthetics, and lighthearted humor.
+
+  🎮 Version: 0.0.8
+  💡 Made with HTML, CSS, JavaScript, and love.
+  🐾 Feedback & ideas are always welcome!
+
+  Thanks for playing!`,
+    button: 'Close',
+  });
+
+});
+
+// Reset button
 let isResetting = false;
 
 $('#reset-btn').click(function() {
-  if (confirm("Are you sure you want to reset your farm? All progress will be lost!")) {
-    isResetting = true;
-    localStorage.removeItem('alpaca_save');
-    location.reload();
-  }
+  // if (confirm("Are you sure you want to reset your farm? All progress will be lost!")) {
+  //   isResetting = true;
+  //   localStorage.removeItem('alpaca_save');
+  //   location.reload();
+  // }
+
+  swal({
+    title: "Reset Game?",
+    text: "Are you sure you want to reset your farm? All progress will be lost!",
+    buttons: true,
+  }).then((willReset) => {
+    if (willReset) {
+      isResetting = true;
+      localStorage.removeItem('alpaca_save');
+      location.reload();
+    }
+  });
 });
 
 window.addEventListener('beforeunload', ()=>{
   if (!isResetting) saveState();
 });
-
-// // before unload
-// window.addEventListener('beforeunload', ()=>{ saveState(); });

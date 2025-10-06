@@ -1,9 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- <meta name="viewport" content="width=device-width,initial-scale=1" /> -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
   <title>Alpaca Valley</title>
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
@@ -15,8 +14,6 @@
     <div class="statusBar">
       <h1><a href="/alpacavalley/">Alpaca Valley</a></h1>
 
-      <!-- <div class="progress"><div id="expBar" class="bar" style="width:0%"> <span id="expText"></span></div></div> -->
-
       <div id="levelContainer">
         <div>Farm Level: <span id="levelDisplay">1</span></div>
       </div>
@@ -26,15 +23,11 @@
       </div>
 
       <ul>
-        <!-- <li><img src="img/Star.png" alt="Level"> <span id="levelDisplay">1</span> </li> -->
-        <li class="tooltip" id="idleRate" data-title="0"><img src="img/wool2.png" alt="Wool"> <span id="woolDisplay">0</span></li>
+        <li class="tooltip" id="idleRate" data-title="0"><img src="img/icons/wool2.png" alt="Wool"> <span id="woolDisplay">0</span></li>
         <li><img src="img/alpacas/alpaca3.png" class="alpacaIcon"><span id="displayHerdSize"></span></li>
-        <!-- <li>Auto wool / sec: <span id="idleRate">0</span></li> -->
-        <li><img src="img/Coin.png" alt="Money"> <span id="coinsDisplay">0</span></li>
-        <li><img src="img/Heart.png" alt="Happiness"> <span id="happyDisplay">50%</span></li>
+        <li><img src="img/icons/coin.png" alt="Money"> <span id="coinsDisplay">0</span></li>
+        <li><img src="img/icons/heart.png" alt="Happiness"> <span id="happyDisplay">50%</span></li>
       </ul>
-
-      <!-- <button id="achBtn">Ach</button> -->
     </div><!-- end statusBar -->
 
     <div class="leftSidebar">
@@ -46,19 +39,24 @@
       <button id="buyAlpacaBtn" class="btn tooltip" data-title="Cost 0 coins">Buy Alpaca</button>
 
       <h3>Upgrades</h3>
-      <!-- <div class="muted" style="margin-top:8px">Permanent improvements for your farm</div> -->
       <button class="btn tooltip" id="upgradeBarn" data-title="Cost 0 coins">Upgrade Barn</button>
       <button class="btn tooltip" id="upgradeAuto" data-title="Cost 0 coins">Buy Robot</button>
 
-      <!-- <footer>v.0.0.8 <a href="#" id="reset-btn">Reset game</a></footer> -->
       <footer>
-        Version: 0.1.1
-        <a href="#" id="mute-btn">Sound off</a>
-        <a href="#" id="reset-btn">Reset game</a>
+        <div id="versionDisplay">-</div>
+        <div id="timeDisplay">-</div>
       </footer>
     </div><!-- end leftSidebar -->
 
     <div class="rightSidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="#" id="achiev-btn">Achievements</a></li>
+        <li><a href="#" id="mute-btn">Sound</a></li>
+        <li><a href="#" id="about-btn">About</a></li>
+        <li><a href="#" id="reset-btn">Reset</a></li>
+      </ul>
+
       <h3>Power-ups</h3>
       <div class="store" id="storeArea">
         <!-- powerups inserted here -->
@@ -69,8 +67,6 @@
       <div id="alpacaImagesContainer">
           <!-- Alpaca images will be inserted here -->
       </div>
-
-
     </div><!-- end topCenter -->
 
     <div class="bottomCenter">
@@ -79,7 +75,8 @@
   </div><!-- end parent -->
 
   <!-- js -->
-    <script src="js/jquery-3.6.0.min.js"></script>
+  <script src="js/jquery-3.6.0.min.js"></script>
+  <script src="js/sweetalert.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
