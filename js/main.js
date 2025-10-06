@@ -887,7 +887,7 @@ function initGame(){
   autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
 }
 
-const assetList = [
+const assets = [
   // Alpacas
   'img/alpacas/alpaca.png',
   'img/alpacas/alpaca3.png',
@@ -929,38 +929,38 @@ const assetList = [
 ];
 
 // preload assets
-function preloadAssets(assetList, onComplete) {
+function preloadAssets(assets, onComplete, onProgress) {
   let loaded = 0;
-  const total = assetList.length;
+  const total = assets.length;
 
   if (total === 0) {
     onComplete();
     return;
   }
 
-  assetList.forEach(src => {
-    let el;
+  assets.forEach((asset) => {
+    const ext = asset.split('.').pop().toLowerCase();
+    let element;
 
-    if (src.endsWith('.png') || src.endsWith('.jpg') || src.endsWith('.gif')) {
-      el = new Image();
-      el.onload = el.onerror = done;
-    } else if (src.endsWith('.mp3') || src.endsWith('.wav') || src.endsWith('.ogg')) {
-      el = new Audio();
-      el.oncanplaythrough = el.onerror = done;
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+      element = new Image();
+      element.onload = element.onerror = handleLoad;
+      element.src = asset;
+    } else if (['mp3', 'ogg', 'wav'].includes(ext)) {
+      element = new Audio();
+      element.oncanplaythrough = element.onerror = handleLoad;
+      element.src = asset;
+      element.load();
     } else {
-      console.warn("Unknown asset type:", src);
-      done();
-      return;
+      // Unknown asset type, skip but count it as loaded
+      handleLoad();
     }
-
-    el.src = src;
   });
 
-  function done() {
+  function handleLoad() {
     loaded++;
-    if (loaded >= total) {
-      onComplete();
-    }
+    if (onProgress) onProgress(loaded, total);
+    if (loaded >= total && onComplete) onComplete();
   }
 }
 
@@ -976,17 +976,29 @@ $(document).ready(() => {
   //   $('.loading-text').text(`Loading... ${percent}%`);
   // });
 
-  preloadAssets(assetList, () => {
-    // Artificial delay for testing
-    setTimeout(() => {
-      $('#loadingScreen').fadeOut(500);
-      initGame();
-    }, 2000); // 2000ms = 2 seconds
+  // preloadAssets(assetList, () => {
+  //   // Artificial delay for testing
+  //   setTimeout(() => {
+  //     $('#loadingScreen').fadeOut(500);
+  //     initGame();
+  //   }, 2000); // 2000ms = 2 seconds
+  // }, (loaded, total) => {
+  //   const percent = Math.floor((loaded / total) * 100);
+  //   $('.loading-fill').css('width', percent + '%');
+  //   $('.loading-text').text(`Loading... ${percent}%`);
+  // });
+
+  preloadAssets(assets, () => {
+    console.log("✅ All assets loaded");
+    $('#loadingScreen').fadeOut(500);
+    initGame();
   }, (loaded, total) => {
+    console.log(`Progress: ${loaded}/${total}`);
     const percent = Math.floor((loaded / total) * 100);
     $('.loading-fill').css('width', percent + '%');
     $('.loading-text').text(`Loading... ${percent}%`);
   });
+
 });
 
 // Sound button
