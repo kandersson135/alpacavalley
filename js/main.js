@@ -61,8 +61,8 @@ const ACH_DEFS = [
   {id:'use_5_power', title:'Powered Up', desc:'Use 5 power-ups', check: s=>s.powerupsUsed>=5},
   {id:'herd_10', title:'Herd Master', desc:'Own 10 alpacas', check: s=>s.herd>=10},
   {id:'wool_500', title:'Wool Tycoon', desc:'Collect 500 wool total', check: s=>s.wool>=500},
-  {id:'level_10', title:'Elite Farmer', desc:'Reach farm level 10', check: s=>s.level>=10},
-  {id:'coins_5000', title:'Millionaire', desc:'Reach 100k coins', check: s=>s.coins>=100000},
+  {id:'level_20', title:'Elite Farmer', desc:'Reach farm level 20', check: s=>s.level>=20},
+  {id:'coins_100k', title:'Millionaire', desc:'Reach 100k coins', check: s=>s.coins>=100000},
   {id:'use_10_power', title:'Power User', desc:'Use 10 power-ups', check: s=>s.powerupsUsed>=10}
 ];
 
