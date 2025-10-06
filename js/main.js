@@ -62,7 +62,7 @@ const ACH_DEFS = [
   {id:'herd_10', title:'Herd Master', desc:'Own 10 alpacas', check: s=>s.herd>=10},
   {id:'wool_500', title:'Wool Tycoon', desc:'Collect 500 wool total', check: s=>s.wool>=500},
   {id:'level_10', title:'Elite Farmer', desc:'Reach farm level 10', check: s=>s.level>=10},
-  {id:'coins_5000', title:'Millionaire', desc:'Reach 5000 coins', check: s=>s.coins>=5000},
+  {id:'coins_5000', title:'Millionaire', desc:'Reach 100k coins', check: s=>s.coins>=100000},
   {id:'use_10_power', title:'Power User', desc:'Use 10 power-ups', check: s=>s.powerupsUsed>=10}
 ];
 
@@ -961,19 +961,12 @@ $('#about-btn').click(function() {
   Thanks for playing!`,
     button: 'Close',
   });
-
 });
 
 // Reset button
 let isResetting = false;
 
 $('#reset-btn').click(function() {
-  // if (confirm("Are you sure you want to reset your farm? All progress will be lost!")) {
-  //   isResetting = true;
-  //   localStorage.removeItem('alpaca_save');
-  //   location.reload();
-  // }
-
   swal({
     title: "Reset Game?",
     text: "Are you sure you want to reset your farm? All progress will be lost!",
