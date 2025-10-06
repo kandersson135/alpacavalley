@@ -10,7 +10,8 @@ html, body {
 
 button,
 .statusBar a,
-footer a {
+footer a,
+.rightSidebar a {
   cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
 }
 
