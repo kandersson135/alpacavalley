@@ -748,6 +748,41 @@ function formatNumber(num) {
 let autosaveTimer = null;
 function autosave(){ saveState(); }
 
+// alpaca time
+const GAME_START = new Date(); // your game’s "day 1" reference
+const REAL_MINUTES_PER_DAY = 10; // adjust for pacing
+let lastLoggedDay = 0;
+const dayMessages = [
+  "🌞 A new alpaca day begins!",
+  "☁️ The alpacas yawn and stretch.",
+  "🌤️ Another peaceful morning on the farm.",
+  "🌾 The fields shimmer under the morning sun.",
+];
+
+function updateTimeDisplay() {
+  const now = new Date();
+  const elapsedMs = now - GAME_START;
+
+  // Calculate in-game day
+  const realMsPerDay = REAL_MINUTES_PER_DAY * 60 * 1000;
+  const dayNumber = Math.floor(elapsedMs / realMsPerDay) + 1;
+
+  // log once when a new day starts
+  if (dayNumber !== lastLoggedDay) {
+    if (lastLoggedDay !== 0) { // skip logging on very first update
+      //log(`🌞 A new alpaca day begins! (Day ${dayNumber})`, "info");
+      log(`${dayMessages[Math.floor(Math.random() * dayMessages.length)]} (Day ${dayNumber})`, "info");
+    }
+    lastLoggedDay = dayNumber;
+  }
+
+  // Format real-world time (for flavor)
+  const timeString = now.toLocaleTimeString([], { hour12: false }); // e.g. 14:23:08
+
+  // Update display
+  $('#timeDisplay').text(`Day ${dayNumber} — ${timeString}`);
+}
+
 // UI render
 function updateUI(){
   $('#levelDisplay').text(S.level);
@@ -763,7 +798,7 @@ function updateUI(){
   //$('#herdSize').text(S.herd);
   //$('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
   $('#versionDisplay').text("Version: 0.0.8");
-  $('#timeDisplay').text(new Date().toLocaleString());
+  //$('#timeDisplay').text(new Date().toLocaleString());
 
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
 
@@ -860,6 +895,8 @@ setInterval(()=>{
 // cleanup expired powerups often
 setInterval(()=>{ applyPowerupEffects(); }, 2000);
 
+let timeTimer;
+
 // UI wiring
 function initGame(){
   updateUI();
@@ -876,6 +913,11 @@ function initGame(){
   // play bg Audio
   bgAudio.play();
   alpacaAudio.play();
+
+  // --- Start your farm clock ---
+  if (timeTimer) clearInterval(timeTimer); // prevent duplicates
+  updateTimeDisplay(); // show it immediately
+  timeTimer = setInterval(updateTimeDisplay, 1000); // then update every second
 
   // store buy
   $('#storeArea').on('click','button[data-buy]', function(){ const id=$(this).data('buy'); buyPowerup(id); updateUI(); });
@@ -989,11 +1031,11 @@ $(document).ready(() => {
   // });
 
   preloadAssets(assets, () => {
-    console.log("✅ All assets loaded");
+    //console.log("✅ All assets loaded");
     $('#loadingScreen').fadeOut(500);
     initGame();
   }, (loaded, total) => {
-    console.log(`Progress: ${loaded}/${total}`);
+    //console.log(`Progress: ${loaded}/${total}`);
     const percent = Math.floor((loaded / total) * 100);
     $('.loading-fill').css('width', percent + '%');
     $('.loading-text').text(`Loading... ${percent}%`);
