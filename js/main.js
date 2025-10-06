@@ -8,10 +8,8 @@ let pootAudio = new Audio('audio/poot.mp3');
 let spawnAudio = new Audio('audio/spawn.wav');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
-bgAudio.play();
 alpacaAudio.volume = 0.3;
 alpacaAudio.loop = true;
-alpacaAudio.play();
 alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
 pootAudio.volume = 0.3;
@@ -863,7 +861,7 @@ setInterval(()=>{
 setInterval(()=>{ applyPowerupEffects(); }, 2000);
 
 // UI wiring
-$(function(){
+function initGame(){
   updateUI();
   initStoreUI();
   // attach buttons
@@ -875,6 +873,10 @@ $(function(){
   $('#upgradeBarn').click(()=>{ upgradeBarn(); updateUI(); });
   $('#upgradeAuto').click(()=>{ upgradeAuto(); updateUI(); });
 
+  // play bg Audio
+  bgAudio.play();
+  alpacaAudio.play();
+
   // store buy
   $('#storeArea').on('click','button[data-buy]', function(){ const id=$(this).data('buy'); buyPowerup(id); updateUI(); });
 
@@ -883,6 +885,108 @@ $(function(){
   // autosave every 10s
   if(autosaveTimer) clearInterval(autosaveTimer);
   autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
+}
+
+const assetList = [
+  // Alpacas
+  'img/alpacas/alpaca.png',
+  'img/alpacas/alpaca3.png',
+  'img/alpacas/black.gif',
+  'img/alpacas/brown.gif',
+  'img/alpacas/brown2.gif',
+  'img/alpacas/brown3.gif',
+  'img/alpacas/white.gif',
+  'img/alpacas/white2.gif',
+  // UI
+  'img/buttons/about.png',
+  'img/buttons/about-pressed.png',
+  'img/buttons/reset.png',
+  'img/buttons/reset-pressed.png',
+  'img/buttons/small-bar.png',
+  'img/buttons/small-bar-pressed.png',
+  'img/buttons/sound-off.png',
+  'img/buttons/sound-off-pressed.png',
+  'img/buttons/sound-on.png',
+  'img/buttons/sound-on-pressed.png',
+  'img/buttons/trophy.png',
+  'img/buttons/trophy-pressed.png',
+  'img/icons/coin.png',
+  'img/icons/heart.png',
+  'img/icons/wool3.png',
+  'img/misc/fence.png',
+  'img/misc/fence.png',
+  'img/misc/hand-cursor.png',
+  'img/misc/pointer-cursor.png',
+  'img/misc/poop.png',
+  // Sounds
+  'audio/bg.ogg',
+  'audio/alpaca-noise4.mp3',
+  'audio/alpaca-noise3.mp3',
+  'audio/pop.mp3',
+  'audio/thump.mp3',
+  'audio/poot.mp3',
+  'audio/spawn.wav',
+];
+
+// preload assets
+function preloadAssets(assetList, onComplete) {
+  let loaded = 0;
+  const total = assetList.length;
+
+  if (total === 0) {
+    onComplete();
+    return;
+  }
+
+  assetList.forEach(src => {
+    let el;
+
+    if (src.endsWith('.png') || src.endsWith('.jpg') || src.endsWith('.gif')) {
+      el = new Image();
+      el.onload = el.onerror = done;
+    } else if (src.endsWith('.mp3') || src.endsWith('.wav') || src.endsWith('.ogg')) {
+      el = new Audio();
+      el.oncanplaythrough = el.onerror = done;
+    } else {
+      console.warn("Unknown asset type:", src);
+      done();
+      return;
+    }
+
+    el.src = src;
+  });
+
+  function done() {
+    loaded++;
+    if (loaded >= total) {
+      onComplete();
+    }
+  }
+}
+
+$(document).ready(() => {
+
+
+  // preloadAssets(assetList, () => {
+  //   $('#loadingScreen').fadeOut(500);
+  //   initGame();
+  // }, (loaded, total) => {
+  //   const percent = Math.floor((loaded / total) * 100);
+  //   $('.loading-fill').css('width', percent + '%');
+  //   $('.loading-text').text(`Loading... ${percent}%`);
+  // });
+
+  preloadAssets(assetList, () => {
+    // Artificial delay for testing
+    setTimeout(() => {
+      $('#loadingScreen').fadeOut(500);
+      initGame();
+    }, 2000); // 2000ms = 2 seconds
+  }, (loaded, total) => {
+    const percent = Math.floor((loaded / total) * 100);
+    $('.loading-fill').css('width', percent + '%');
+    $('.loading-text').text(`Loading... ${percent}%`);
+  });
 });
 
 // Sound button
