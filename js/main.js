@@ -5,7 +5,7 @@ let alpacaNoise = new Audio('audio/alpaca-noise3.mp3');
 let popAudio = new Audio('audio/pop.mp3');
 let thumpAudio = new Audio('audio/thump.mp3');
 let pootAudio = new Audio('audio/poot.mp3');
-let spawnAudio = new Audio('audio/spawn.wav');
+let spawnAudio = new Audio('audio/poof.wav');
 bgAudio.volume = 0.1;
 bgAudio.loop = true;
 alpacaAudio.volume = 0.3;
@@ -322,7 +322,7 @@ function addSingleAlpaca() {
     top: Math.random() * (containerHeight - 48) + 'px',
     transform: 'scaleX(1)'
   });
-  //container.append(img);
+  container.append(img);
 
   spawnAudio.play();
 
@@ -344,14 +344,50 @@ function addSingleAlpaca() {
   }
 
   // spawn animation - drop drom top
-  const spawnY = -40; // start slightly above container
-  const targetTop = Math.random() * (containerHeight - 48);
-  img.css({ top: spawnY + 'px', opacity: 0 });
-  container.append(img);
+  // const spawnY = -40; // start slightly above container
+  // const targetTop = Math.random() * (containerHeight - 48);
+  // img.css({ top: spawnY + 'px', opacity: 0 });
+  // container.append(img);
+  // img.animate(
+  //   { top: targetTop + 'px', opacity: 1 },
+  //   { duration: 800, easing: 'swing', complete: () => wander(img) }
+  // );
+
+  // --- Spawn animation
+  img.css({
+    opacity: 0,
+    transform: 'scale(0.5)'
+  });
   img.animate(
-    { top: targetTop + 'px', opacity: 1 },
-    { duration: 800, easing: 'swing', complete: () => wander(img) }
+    { opacity: 1 },
+    {
+      duration: 400,
+      step: function (now, fx) {
+        if (fx.prop === "opacity") {
+          const scale = 0.5 + now * 0.5;
+          $(this).css('transform', `scale(${scale})`);
+        }
+      },
+      complete: function () {
+        $(this).css('transform', 'scaleX(1)'); // restore normal facing
+        wander(img);
+      }
+    }
   );
+
+  // poof animation
+  const poof = $('<img src="img/misc/poof.gif" class="spawn-poof">');
+  poof.css({
+    position: 'absolute',
+    left: img.css('left'),
+    top: img.css('top'),
+    width: '31px',
+    height: '26px',
+    opacity: 1,
+    pointerEvents: 'none'
+  });
+  container.append(poof);
+  poof.animate({ opacity: 0, width: '48px', height: '48px' }, 800, () => poof.remove());
 
   //wander(img);
 
