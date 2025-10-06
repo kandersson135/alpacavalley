@@ -1041,7 +1041,11 @@ $(document).ready(() => {
     $('.loading-fill').css('width', percent + '%');
     $('.loading-text').text(`Loading... ${percent}%`);
   });
+});
 
+// prevent right click
+$(document).on("contextmenu", function(e) {
+  e.preventDefault();
 });
 
 // Sound button
