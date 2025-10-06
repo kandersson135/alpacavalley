@@ -8,10 +8,7 @@ html, body {
     cursor: url("../img/misc/pointer-cursor.png") 4 4, auto;
 }
 
-button,
-.statusBar a,
-footer a,
-.rightSidebar a {
+button, a {
   cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
 }
 
