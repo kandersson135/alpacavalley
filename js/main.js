@@ -960,6 +960,7 @@ const assets = [
   'img/misc/hand-cursor.png',
   'img/misc/pointer-cursor.png',
   'img/misc/poop.png',
+  'img/misc/paddock-bg.jpg',
   // Sounds
   'audio/bg.ogg',
   'audio/alpaca-noise4.mp3',
