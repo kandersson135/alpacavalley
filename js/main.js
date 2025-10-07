@@ -173,16 +173,13 @@ function displayAlpacas(){
 
   for(let i=0;i<S.herd;i++){
     const randomIndex = Math.floor(Math.random()*alpacaImages.length);
-    const img = $('<img>');
+    const img = $('<img class="alpaca">');
     img.attr('src', alpacaImages[randomIndex]);
     img.css({
-      width:'29px',
-      height:'36px',
-      imageRendering:'pixelated',
-      position:'absolute',
-      left: Math.random()*(containerWidth-48)+'px',
-      top: Math.random()*(containerHeight-48)+'px',
-      transform: 'scaleX(1)' // start facing right by default
+      position: 'absolute',
+      left: Math.random() * (containerWidth - 48) + 'px',
+      top: Math.random() * (containerHeight - 48) + 'px',
+      transform: 'scaleX(1)'
     });
     container.append(img);
 
@@ -210,34 +207,99 @@ function displayAlpacas(){
     //   })();
     // }
 
-    function wander(el){
-      function move(){
-        const currentLeft = parseFloat(el.css('left')) || 0;
-        const currentTop = parseFloat(el.css('top')) || 0;
 
-        // Random step distance (small shuffle vs bigger move)
-        const deltaX = (Math.random()-0.5) * (20 + Math.random()*60); // 20–80px range
-        const deltaY = (Math.random()-0.5) * (20 + Math.random()*60);
+    function updateAlpacaDepthAndScale(el, flip) {
+      const alpacaTop = el.position().top;
+      const alpacaLeft = el.position().left;
+      const alpacaWidth = el.outerWidth();
+      const alpacaHeight = el.outerHeight();
+      const containerHeight = $('#alpacaImagesContainer').height();
 
-        const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth-48);
-        const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight-48);
+      // 1️⃣ Scale based on vertical position (pseudo-3D)
+      const scale = 0.8 + 0.4 * (alpacaTop / containerHeight);
 
-        // Flip based on horizontal direction
-        if(deltaX > 0){
-          el.css('transform', 'scaleX(1)');
-        } else if(deltaX < 0){
-          el.css('transform', 'scaleX(-1)');
+      // 2️⃣ Check all trees for overlap and distance
+      const trees = $('.tree').map(function() {
+        const $t = $(this);
+        return {
+          left: $t.position().left,
+          top: $t.position().top,
+          width: $t.outerWidth(),
+          height: $t.outerHeight()
+        };
+      }).get();
+
+      let behind = false;
+      let opacity = 1;
+      let brightness = 1;
+      let dropShadow = '0px 0px 0px rgba(0,0,0,0)';
+
+      for (const tree of trees) {
+        const treeLeft = tree.left;
+        const treeRight = tree.left + tree.width;
+        const treeBottom = tree.top + tree.height;
+        const treeCenterX = tree.left + tree.width / 2;
+
+        const alpacaCenterX = alpacaLeft + alpacaWidth / 2;
+        const alpacaBottomY = alpacaTop + alpacaHeight;
+
+        // Check horizontal overlap
+        const overlapsX = alpacaCenterX > treeLeft && alpacaCenterX < treeRight;
+
+        // Vertical distance from tree base
+        const distanceY = treeBottom - alpacaBottomY; // positive if above tree base
+
+        if (overlapsX && distanceY > 0) {
+          behind = true;
+
+          // Fade opacity and brightness smoothly based on distance
+          const maxFadeDistance = 50; // pixels for max fade
+          const factor = Math.min(distanceY / maxFadeDistance, 1);
+
+          opacity = 1 - 0.2 * factor;           // 1 → 0.8
+          brightness = 1 - 0.15 * factor;       // 1 → 0.85
+          dropShadow = `0px 4px 2px rgba(0,0,0,0.3)`;
+
+          break; // stop at the first tree that affects the alpaca
         }
+      }
 
-        // Random step duration (2s–6s)
-        const stepTime = 6000 + Math.random()*4000;
+      // 3️⃣ Apply dynamic styles
+      el.css({
+        'z-index': behind ? 1 : 3,
+        //'opacity': opacity,
+        'filter': `brightness(${brightness}) ${dropShadow}`,
+        'transform': `scaleX(${flip}) scale(${scale})`
+      });
+    }
 
-        el.animate(
-          { left:newLeft+'px', top:newTop+'px' },
-          stepTime,
-          'linear',
-          move
-        );
+    function wander(el) {
+      function move() {
+      const currentLeft = parseFloat(el.css('left')) || 0;
+      const currentTop = parseFloat(el.css('top')) || 0;
+      const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 200);
+      const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 200);
+
+      const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
+      const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
+
+      // Decide flip direction
+      const flip = deltaX >= 0 ? 1 : -1;
+
+      const stepTime = 6000 + Math.random() * 4000;
+
+      el.animate(
+        { left: newLeft + 'px', top: newTop + 'px' },
+        {
+          duration: stepTime,
+          easing: 'linear',
+          step: function(now, fx) {
+            // continuously update depth + scale + flip
+            updateAlpacaDepthAndScale(el, flip);
+          },
+          complete: move
+        }
+      );
       }
       move();
     }
@@ -282,13 +344,11 @@ function displayAlpacas(){
         let newLeft = currentLeft + vx;
         let newTop = currentTop + vy;
 
-        // Keep inside container
+        // Keep inside container and adjust flip
+        let flip = vx >= 0 ? 1 : -1;
         if (newLeft < 0 || newLeft > containerWidth - el.width()) {
           newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
-          // Reverse X direction if hitting wall
-          el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
-        } else {
-          el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
+          flip *= -1; // reverse flip if hitting wall
         }
 
         if (newTop < 0 || newTop > containerHeight - el.height()) {
@@ -296,6 +356,10 @@ function displayAlpacas(){
         }
 
         el.css({ left: newLeft + 'px', top: newTop + 'px' });
+
+        // ✅ Update depth, scale, opacity, filter dynamically
+        updateAlpacaDepthAndScale(el, flip);
+
         requestAnimationFrame(runAway);
       }
 
@@ -313,12 +377,9 @@ function addSingleAlpaca() {
   const containerHeight = container.height();
   const randomIndex = Math.floor(Math.random() * alpacaImages.length);
 
-  const img = $('<img>');
+  const img = $('<img class="alpaca">');
   img.attr('src', alpacaImages[randomIndex]);
   img.css({
-    width: '29px',
-    height: '36px',
-    imageRendering: 'pixelated',
     position: 'absolute',
     left: Math.random() * (containerWidth - 48) + 'px',
     top: Math.random() * (containerHeight - 48) + 'px',
@@ -328,19 +389,99 @@ function addSingleAlpaca() {
 
   spawnAudio.play();
 
+  function updateAlpacaDepthAndScale(el, flip) {
+    const alpacaTop = el.position().top;
+    const alpacaLeft = el.position().left;
+    const alpacaWidth = el.outerWidth();
+    const alpacaHeight = el.outerHeight();
+    const containerHeight = $('#alpacaImagesContainer').height();
+
+    // 1️⃣ Scale based on vertical position (pseudo-3D)
+    const scale = 0.8 + 0.4 * (alpacaTop / containerHeight);
+
+    // 2️⃣ Check all trees for overlap and distance
+    const trees = $('.tree').map(function() {
+      const $t = $(this);
+      return {
+        left: $t.position().left,
+        top: $t.position().top,
+        width: $t.outerWidth(),
+        height: $t.outerHeight()
+      };
+    }).get();
+
+    let behind = false;
+    let opacity = 1;
+    let brightness = 1;
+    let dropShadow = '0px 0px 0px rgba(0,0,0,0)';
+
+    for (const tree of trees) {
+      const treeLeft = tree.left;
+      const treeRight = tree.left + tree.width;
+      const treeBottom = tree.top + tree.height;
+      const treeCenterX = tree.left + tree.width / 2;
+
+      const alpacaCenterX = alpacaLeft + alpacaWidth / 2;
+      const alpacaBottomY = alpacaTop + alpacaHeight;
+
+      // Check horizontal overlap
+      const overlapsX = alpacaCenterX > treeLeft && alpacaCenterX < treeRight;
+
+      // Vertical distance from tree base
+      const distanceY = treeBottom - alpacaBottomY; // positive if above tree base
+
+      if (overlapsX && distanceY > 0) {
+        behind = true;
+
+        // Fade opacity and brightness smoothly based on distance
+        const maxFadeDistance = 50; // pixels for max fade
+        const factor = Math.min(distanceY / maxFadeDistance, 1);
+
+        opacity = 1 - 0.2 * factor;           // 1 → 0.8
+        brightness = 1 - 0.15 * factor;       // 1 → 0.85
+        dropShadow = `0px 4px 2px rgba(0,0,0,0.3)`;
+
+        break; // stop at the first tree that affects the alpaca
+      }
+    }
+
+    // 3️⃣ Apply dynamic styles
+    el.css({
+      'z-index': behind ? 1 : 3,
+      //'opacity': opacity,
+      'filter': `brightness(${brightness}) ${dropShadow}`,
+      'transform': `scaleX(${flip}) scale(${scale})`
+    });
+  }
+
   // --- Wandering logic (reuse your wander function)
   function wander(el) {
     function move() {
-      const currentLeft = parseFloat(el.css('left')) || 0;
-      const currentTop = parseFloat(el.css('top')) || 0;
-      const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 60);
-      const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 60);
-      const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
-      const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
-      if (deltaX > 0) el.css('transform', 'scaleX(1)');
-      else if (deltaX < 0) el.css('transform', 'scaleX(-1)');
-      const stepTime = 6000 + Math.random() * 4000;
-      el.animate({ left: newLeft + 'px', top: newTop + 'px' }, stepTime, 'linear', move);
+    const currentLeft = parseFloat(el.css('left')) || 0;
+    const currentTop = parseFloat(el.css('top')) || 0;
+    const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 200);
+    const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 200);
+
+    const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
+    const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
+
+    // Decide flip direction
+    const flip = deltaX >= 0 ? 1 : -1;
+
+    const stepTime = 6000 + Math.random() * 4000;
+
+    el.animate(
+      { left: newLeft + 'px', top: newTop + 'px' },
+      {
+        duration: stepTime,
+        easing: 'linear',
+        step: function(now, fx) {
+          // continuously update depth + scale + flip
+          updateAlpacaDepthAndScale(el, flip);
+        },
+        complete: move
+      }
+    );
     }
     move();
   }
@@ -394,44 +535,65 @@ function addSingleAlpaca() {
   //wander(img);
 
   // --- Click behavior
-  img.click(function () {
+  img.click(function() {
     const el = $(this);
-    const runDuration = 3000;
-    const startTime = Date.now();
+    const runDuration = 3000; // 3 seconds
+    const containerWidth = $('#alpacaImagesContainer').width();
+    const containerHeight = $('#alpacaImagesContainer').height();
+
+    // Play alpaca noise
+    alpacaNoise.currentTime = 0;
+    alpacaNoise.play();
+
+    // Reduce happiness for stressing the alpaca
+    S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
+    log("The alpaca got stressed! Happiness -3", "warning");
+
+    el.stop(true);
+
+    // Random persistent direction for this run
     const angle = Math.random() * 2 * Math.PI;
-    const speed = 1;
+    const speed = 1; // pixels per frame, smaller = smoother
     const vx = Math.cos(angle) * speed;
     const vy = Math.sin(angle) * speed;
 
-    alpacaNoise.currentTime = 0;
-    alpacaNoise.play();
-    S.happiness = Math.max(0, S.happiness - 3);
-    log("The alpaca got stressed! Happiness -3", "warning");
-    el.stop(true);
+    const startTime = Date.now();
 
     function runAway() {
       const elapsed = Date.now() - startTime;
       if (elapsed >= runDuration) {
-        wander(el);
+        wander(el); // resume normal wandering
         return;
       }
-      const containerWidth = $('#alpacaImagesContainer').width();
-      const containerHeight = $('#alpacaImagesContainer').height();
-      let left = parseFloat(el.css('left')) || 0;
-      let top = parseFloat(el.css('top')) || 0;
-      let newLeft = left + vx;
-      let newTop = top + vy;
+
+      let currentLeft = parseFloat(el.css('left')) || 0;
+      let currentTop = parseFloat(el.css('top')) || 0;
+
+      // Move in persistent direction
+      let newLeft = currentLeft + vx;
+      let newTop = currentTop + vy;
+
+      // Keep inside container and adjust flip
+      let flip = vx >= 0 ? 1 : -1;
       if (newLeft < 0 || newLeft > containerWidth - el.width()) {
         newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
+        flip *= -1; // reverse flip if hitting wall
       }
+
       if (newTop < 0 || newTop > containerHeight - el.height()) {
         newTop = Math.min(Math.max(newTop, 0), containerHeight - el.height());
       }
-      el.css('transform', vx >= 0 ? 'scaleX(1)' : 'scaleX(-1)');
+
       el.css({ left: newLeft + 'px', top: newTop + 'px' });
+
+      // ✅ Update depth, scale, opacity, filter dynamically
+      updateAlpacaDepthAndScale(el, flip);
+
       requestAnimationFrame(runAway);
     }
+
     runAway();
+    updateUI();
   });
 }
 
@@ -996,11 +1158,14 @@ const assets = [
   'img/icons/heart.png',
   'img/icons/wool3.png',
   'img/misc/fence.png',
-  'img/misc/fence.png',
   'img/misc/hand-cursor.png',
   'img/misc/pointer-cursor.png',
   'img/misc/poop.png',
-  'img/misc/paddock-bg.jpg',
+  'img/misc/paddock-bg4.png',
+  'img/misc/tree.png',
+  'img/misc/tree2.png',
+  'img/misc/bush.png',
+  'img/misc/barn.png',
   // Sounds
   'audio/bg.ogg',
   'audio/alpaca-noise4.mp3',

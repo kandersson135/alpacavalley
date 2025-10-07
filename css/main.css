@@ -209,7 +209,8 @@ body {
   grid-column-start: 2;
   grid-row-start: 2;
 
-  background-color: #4285f4;
+  position: relative;
+  overflow: hidden;
 }
 
 .bottomCenter {
@@ -465,7 +466,9 @@ footer {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%238dd868' fill-opacity='0.4'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 
   background: #c0d470 url("../img/misc/paddock-bg.jpg") repeat;
-  background-size: 200px;
+  background: #c0d470 url("../img/test5.png") repeat;
+  background: #c0d470 url("../img/misc/paddock-bg4.png") repeat;
+  background-size: 130px;
 
   width: auto;
   height: 100%;
@@ -473,7 +476,18 @@ footer {
   overflow: hidden;
   border: 1px solid rgba(50, 50, 50, 0.1);
   border-bottom: 2px solid rgba(50, 50, 50, 0.2);
+  border: 2px solid rgba(50, 50, 50, 0.2);
   box-shadow: inset 0px  0px 40px rgba(50, 50, 50, 0.2);
+}
+
+#alpacaImagesContainer img {
+  cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  position: absolute;
+  /* z-index: 2; */
 }
 
 #alpacaImagesContainer::after {
@@ -488,6 +502,134 @@ footer {
   background-repeat: repeat-x;
   background-size: 64px;
   pointer-events: none;
+  z-index: 4;
+}
+
+.alpaca {
+  position: absolute;
+  width: 29px;
+  height: 36px;
+  image-rendering: pixelated;
+  transition: filter 0.3s, opacity 0.3s, z-index 0.3s;
+}
+
+.barn {
+  position: absolute;
+  bottom: 20px;
+  left: 5px;
+  width: 96px;
+  height: 96px;
+  background-image: url("../img/misc/barn.png");
+  background-repeat: no-repeat;
+  background-size: 96px;
+}
+
+.tree {
+  position: absolute;
+  display: inline-block;
+  pointer-events: none;
+  transform-origin: bottom center; /* Rotate around the tree base */
+  animation: sway 4s ease-in-out infinite;
+  /* z-index: 1; */
+  z-index: 2;
+}
+
+.tree1 {
+  top: 50px;
+  left: 50px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree.png");
+  background-repeat: no-repeat;
+}
+
+.tree2 {
+  top: 100px;
+  right: 75px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree.png");
+  background-repeat: no-repeat;
+}
+
+.tree3{
+  top: 100px;
+  left: 75px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree.png");
+  background-repeat: no-repeat;
+}
+
+.tree4 {
+  top: 90px;
+  left: 25px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree.png");
+  background-repeat: no-repeat;
+}
+
+.tree5 {
+  top: 90px;
+  right: 40px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree2.png");
+  background-repeat: no-repeat;
+}
+
+.tree6 {
+  bottom: 90px;
+  left: 230px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree.png");
+  background-repeat: no-repeat;
+}
+
+.tree7 {
+  bottom: 75px;
+  left: 280px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree2.png");
+  background-repeat: no-repeat;
+}
+
+.tree8 {
+  bottom: 200px;
+  left: 200px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/tree2.png");
+  background-repeat: no-repeat;
+}
+
+.tree9 {
+  top: 200px;
+  right: 180px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/bush.png");
+  background-repeat: no-repeat;
+}
+
+.tree10 {
+  bottom: 200px;
+  left: 180px;
+  width: 64px;
+  height: 64px;
+  background-image: url("../img/misc/bush.png");
+  background-repeat: no-repeat;
+}
+
+@keyframes sway {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(1.5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-1.5deg); }
+  100% { transform: rotate(0deg); }
 }
 
 .upgrade1 {
@@ -501,14 +643,6 @@ footer {
   background-size: 64px;
   background-position: bottom;
   pointer-events: none;
-}
-
-#alpacaImagesContainer img {
-  cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
-  -webkit-user-drag: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
 }
 
 .alpaca-anim {
