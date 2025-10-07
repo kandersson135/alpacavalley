@@ -1008,7 +1008,9 @@ const assets = [
   'audio/pop.mp3',
   'audio/thump.mp3',
   'audio/poot.mp3',
-  'audio/spawn.wav',
+  'audio/upgrade.mp3',
+  'audio/robot.mp3',
+  'audio/poof.wav',
 ];
 
 // preload assets
