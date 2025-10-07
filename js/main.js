@@ -441,7 +441,7 @@ function spawnPoop() {
   const containerWidth = container.width();
   const containerHeight = container.height();
 
-  pootAudio.play();
+  //pootAudio.play();
 
   const poop = $('<img>');
   poop.attr('src', 'img/misc/poop.gif');
