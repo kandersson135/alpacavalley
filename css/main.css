@@ -487,6 +487,19 @@ footer {
   pointer-events: none;
 }
 
+.upgrade1 {
+  position: absolute;
+  display: inline-block;
+  bottom: 0;
+  width: 100%;
+  height: 64px;
+  background-image: url("../img/misc/fence.png");
+  background-repeat: repeat-x;
+  background-size: 64px;
+  background-position: bottom;
+  pointer-events: none;
+}
+
 #alpacaImagesContainer img {
   cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
   -webkit-user-drag: none;
