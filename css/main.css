@@ -197,6 +197,7 @@ body {
   border-left: 2px solid rgba(50, 50, 50, 0.1);
   padding: 10px;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .topCenter {
@@ -351,6 +352,10 @@ footer {
 .rightSidebar ul li {
   display: inline;
   margin-left: 5px;
+}
+
+.rightSidebar ul li:last-child {
+  margin-left: 0;
 }
 
 .rightSidebar ul li a {

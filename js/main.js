@@ -6,7 +6,9 @@ let popAudio = new Audio('audio/pop.mp3');
 let thumpAudio = new Audio('audio/thump.mp3');
 let pootAudio = new Audio('audio/poot.mp3');
 let spawnAudio = new Audio('audio/poof.wav');
-bgAudio.volume = 0.1;
+let upgradeAudio = new Audio('audio/upgrade.mp3');
+let robotAudio = new Audio('audio/robot.mp3');
+bgAudio.volume = 0.3;
 bgAudio.loop = true;
 alpacaAudio.volume = 0.3;
 alpacaAudio.loop = true;
@@ -644,6 +646,7 @@ function upgradeBarn(){
   S.coins -= cost;
   S.barnLevel++;
   log('Barn upgraded. Herd capacity increased.', "success");
+  upgradeAudio.play();
   autosave();
 
   // Update herd size display
@@ -660,6 +663,7 @@ function upgradeAuto() {
   S.coins -= cost;
   S.autoShearLevel = (S.autoShearLevel || 0) + 1;
   log(`You bought a shearing robot! Idle wool increased (robots: ${S.autoShearLevel}).`, "success");
+  robotAudio.play();
   autosave();
 }
 
@@ -1094,6 +1098,8 @@ $('#mute-btn').click(function() {
     thumpAudio.muted = false;
     pootAudio.muted = false;
     spawnAudio.muted = false;
+    upgradeAuto.muted = false;
+    robotAudio.muted = false;
     $(this).removeClass('sound-off');
     //$(this).text('Sound off');
   } else {
@@ -1104,6 +1110,8 @@ $('#mute-btn').click(function() {
     thumpAudio.muted = true;
     pootAudio.muted = true;
     spawnAudio.muted = true;
+    upgradeAudio.muted = true;
+    robotAudio.muted = true;
     $(this).addClass('sound-off');
     //$(this).text('Sound on');
   }
