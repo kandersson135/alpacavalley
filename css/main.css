@@ -3,9 +3,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Gluten:wght@100..900&display=swap');
 
 html, body {
-    height: 100%;
-    margin: 0;
-    cursor: url("../img/misc/pointer-cursor.png") 4 4, auto;
+  height: 100%;
+  margin: 0;
+  cursor: url("../img/misc/pointer-cursor.png") 4 4, auto;
+  /* chrome fix :/ */
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 button, a, .statusBar h1 {
@@ -20,24 +23,24 @@ body {
 }
 
 .parent {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: 55px 250px repeat(3, 1fr); /* first row 20px, others share remaining space */
-    gap: 0px;
-    width: 100vw;
-    height: 100vh;
-    box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 55px 250px repeat(3, 1fr); /* first row 20px, others share remaining space */
+  gap: 0px;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .statusBar {
-    grid-column: span 5 / span 5;
-    background-color: #d4a373;
-    background-color: #bb8754;
-    background-image: url("data:image/svg+xml,%3Csvg width='84' height='16' viewBox='0 0 84 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M78 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM30 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM10 0h2v16h-2V0zm6 0h4v16h-4V0zM2 0h4v16H2V0zm50 0h2v16h-2V0zM38 0h2v16h-2V0zm28 0h2v16h-2V0zm-8 0h6v16h-6V0zM42 0h6v16h-6V0z' fill='%23c9915b' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
-    border-bottom: 2px solid rgba(50, 50, 50, 0.2);
-    padding: 10px;
-    display: flex;
-    justify-content: space-around;
+  grid-column: span 5 / span 5;
+  background-color: #d4a373;
+  background-color: #bb8754;
+  background-image: url("data:image/svg+xml,%3Csvg width='84' height='16' viewBox='0 0 84 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M78 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM30 7V4h-2v3h-3v2h3v3h2V9h3V7h-3zM10 0h2v16h-2V0zm6 0h4v16h-4V0zM2 0h4v16H2V0zm50 0h2v16h-2V0zM38 0h2v16h-2V0zm28 0h2v16h-2V0zm-8 0h6v16h-6V0zM42 0h6v16h-6V0z' fill='%23c9915b' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+  border-bottom: 2px solid rgba(50, 50, 50, 0.2);
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
 }
 
 .statusBar ul {
