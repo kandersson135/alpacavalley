@@ -354,11 +354,11 @@ footer {
   margin-left: 5px;
 }
 
-.rightSidebar ul li:last-child {
+.rightSidebar ul li:first-child {
   margin-left: 0;
 }
 
-.rightSidebar ul li a {
+.rightSidebar ul li button {
   border: none;
   display: inline-block;
   height: 48px;
@@ -368,46 +368,46 @@ footer {
   transition: transform 0.2s ease;
 }
 
-.rightSidebar ul li a:hover {
+.rightSidebar ul li button:hover {
   transform: scale(1.1);
 }
 
-.rightSidebar ul li:first-child a {
+.rightSidebar ul li:first-child button {
   background: url("../img/buttons/trophy.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:first-child a:active {
+.rightSidebar ul li:first-child button:active {
   background: url("../img/buttons/trophy-pressed.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(2) a {
+.rightSidebar ul li:nth-child(2) button {
   background: url("../img/buttons/sound-on.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(2) a:active {
+.rightSidebar ul li:nth-child(2) button:active {
   background: url("../img/buttons/sound-on-pressed.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(3) a {
+.rightSidebar ul li:nth-child(3) button {
   background: url("../img/buttons/about.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(3) a:active {
+.rightSidebar ul li:nth-child(3) button:active {
   background: url("../img/buttons/about-pressed.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(4) a {
+.rightSidebar ul li:nth-child(4) button {
   background: url("../img/buttons/reset.png") no-repeat;
   background-size: contain;
 }
 
-.rightSidebar ul li:nth-child(4) a:active {
+.rightSidebar ul li:nth-child(4) button:active {
   background: url("../img/buttons/reset-pressed.png") no-repeat;
   background-size: contain;
 }
