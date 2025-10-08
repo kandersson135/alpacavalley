@@ -77,14 +77,31 @@ const STORE = [
   {id:'auto_craft', title:'Auto-Craft', cost:300, duration:60, apply: s=>({autoCraft:true})}
 ];
 
-const alpacaImages = [
-  'img/alpacas/black.gif',
-  'img/alpacas/white.gif',
-  'img/alpacas/white2.gif',
-  'img/alpacas/brown.gif',
-  'img/alpacas/brown2.gif',
-  'img/alpacas/brown3.gif',
+// const alpacaImages = [
+//   'img/alpacas/black.gif',
+//   'img/alpacas/white.gif',
+//   'img/alpacas/white2.gif',
+//   'img/alpacas/brown.gif',
+//   'img/alpacas/brown2.gif',
+//   'img/alpacas/brown3.gif',
+//   'img/alpacas/blue.gif',
+//   'img/alpacas/pink.gif',
+// ];
+
+const allAlpacaImages = [
+  { src: 'img/alpacas/black.gif', minLevel: 1, name: 'black' },
+  { src: 'img/alpacas/white.gif', minLevel: 1, name: 'white' },
+  { src: 'img/alpacas/white2.gif', minLevel: 1, name: 'white' },
+  { src: 'img/alpacas/brown.gif', minLevel: 1, name: 'brown' },
+  { src: 'img/alpacas/brown2.gif', minLevel: 1, name: 'brown' },
+  { src: 'img/alpacas/brown3.gif', minLevel: 1, name: 'brown' },
+  { src: 'img/alpacas/pink.gif', minLevel: 15, name: 'pink' }
 ];
+
+// Helper function to get available alpacas based on level
+function getAvailableAlpacaImages() {
+  return allAlpacaImages.filter(a => S.level >= a.minLevel);
+}
 
 // state
 let S = loadState();
@@ -172,9 +189,15 @@ function displayAlpacas(){
   const containerHeight = container.height();
 
   for(let i=0;i<S.herd;i++){
-    const randomIndex = Math.floor(Math.random()*alpacaImages.length);
-    const img = $('<img class="alpaca">');
-    img.attr('src', alpacaImages[randomIndex]);
+    //const randomIndex = Math.floor(Math.random()*alpacaImages.length);
+    //const img = $('<img class="alpaca">');
+    //img.attr('src', alpacaImages[randomIndex]);
+
+    const available = getAvailableAlpacaImages();
+    const chosen = available[Math.floor(Math.random() * available.length)];
+    const img = $('<img>');
+    img.attr('src', chosen.src);
+
     img.css({
       position: 'absolute',
       left: Math.random() * (containerWidth - 48) + 'px',
@@ -375,10 +398,13 @@ function addSingleAlpaca() {
   const container = $('#alpacaImagesContainer');
   const containerWidth = container.width();
   const containerHeight = container.height();
-  const randomIndex = Math.floor(Math.random() * alpacaImages.length);
+  //  const randomIndex = Math.floor(Math.random() * alpacaImages.length);
 
-  const img = $('<img class="alpaca">');
-  img.attr('src', alpacaImages[randomIndex]);
+  const available = getAvailableAlpacaImages();
+  const chosen = available[Math.floor(Math.random() * available.length)];
+  const img = $('<img>');
+  img.attr('src', chosen.src);
+
   img.css({
     position: 'absolute',
     left: Math.random() * (containerWidth - 48) + 'px',
@@ -386,6 +412,10 @@ function addSingleAlpaca() {
     transform: 'scaleX(1)'
   });
   container.append(img);
+
+  if (chosen.name === 'pink') {
+    log("✨ A rare pink alpaca has joined your herd!", "success");
+  }
 
   spawnAudio.play();
 
