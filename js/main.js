@@ -1209,6 +1209,7 @@ const assets = [
   'img/alpacas/brown3.gif',
   'img/alpacas/white.gif',
   'img/alpacas/white2.gif',
+  'img/alpacas/pink.gif',
   // UI
   'img/buttons/about.png',
   'img/buttons/about-pressed.png',
