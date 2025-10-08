@@ -8,6 +8,7 @@ let pootAudio = new Audio('audio/poot.mp3');
 let spawnAudio = new Audio('audio/poof.wav');
 let upgradeAudio = new Audio('audio/upgrade.mp3');
 let robotAudio = new Audio('audio/robot.mp3');
+let levelupAudio = new Audio('audio/level-up.mp3');
 bgAudio.volume = 0.3;
 bgAudio.loop = true;
 alpacaAudio.volume = 0.3;
@@ -15,6 +16,10 @@ alpacaAudio.loop = true;
 alpacaNoise.volume = 0.8;
 popAudio.volume = 0.3;
 pootAudio.volume = 0.3;
+levelupAudio.volume = 0.3;
+spawnAudio.volume = 0.3;
+robotAudio.volume = 0.3;
+upgradeAudio.volume = 0.3;
 
 // Function to detect Chrome/Edge
 function isChromiumBased() {
@@ -154,6 +159,16 @@ function log(text, type = "normal") {
   container.scrollTop(0);
 }
 
+function playLevelUpPulse() {
+  const $badge = $("#levelBadge");
+  $badge.removeClass("pulse");
+  void $badge[0].offsetWidth;
+  $badge.addClass("pulse");
+  $badge.one("animationend", function () {
+    $badge.removeClass("pulse");
+  });
+}
+
 // Experience & Leveling
 function expToNext(level){ return Math.floor(100 * Math.pow(1.5, level-1)); }
 function addExp(amount){ S.exp += amount; checkLevel(); }
@@ -162,6 +177,8 @@ function checkLevel(){
   while(S.exp >= need){
     S.exp -= need; S.level++; S.herd += 0; // maybe reward
     log(`Farm leveled up! Now level ${S.level}`, "success");
+    playLevelUpPulse();
+    levelupAudio.play();
     grantCoins( Math.floor(50 * S.level) );
     need = expToNext(S.level);
     checkAllAch();
@@ -1245,6 +1262,7 @@ const assets = [
   'audio/upgrade.mp3',
   'audio/robot.mp3',
   'audio/poof.wav',
+  'audio/level-up.mp3',
 ];
 
 // preload assets
@@ -1336,6 +1354,7 @@ $('#mute-btn').click(function() {
     spawnAudio.muted = false;
     upgradeAuto.muted = false;
     robotAudio.muted = false;
+    levelupAudio.muted = false;
     $(this).removeClass('sound-off');
     //$(this).text('Sound off');
   } else {
@@ -1348,6 +1367,7 @@ $('#mute-btn').click(function() {
     spawnAudio.muted = true;
     upgradeAudio.muted = true;
     robotAudio.muted = true;
+    levelupAudio.muted = true;
     $(this).addClass('sound-off');
     //$(this).text('Sound on');
   }
