@@ -597,6 +597,42 @@ function addSingleAlpaca() {
   });
 }
 
+function spawnTrees(count = 15) {
+  const container = $('#alpacaImagesContainer');
+  const containerWidth = container.width();
+  const containerHeight = container.height();
+
+  // Margin from edges
+  const margin = 20;
+
+  // Tree size (if consistent)
+  const treeSize = 32;
+
+  // Clear old trees if needed
+  container.find('.tree').remove();
+
+  const treeImages = [
+    'img/misc/tree.png',
+    'img/misc/tree2.png'
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const randomTree = treeImages[Math.floor(Math.random() * treeImages.length)];
+    const tree = $('<img class="tree">').attr('src', randomTree);
+
+    // Random position with margin
+    const x = margin + Math.random() * (containerWidth - treeSize - 2 * margin);
+    const y = margin + Math.random() * (containerHeight - treeSize - 2 * margin);
+
+    tree.css({
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+
+    container.append(tree);
+  }
+}
+
 // spawn poop
 function spawnPoop() {
   const container = $('#alpacaImagesContainer');
@@ -654,6 +690,8 @@ function randomPoopSpawn() {
 // Start it once
 $(document).ready(() => {
   setTimeout(randomPoopSpawn, 5000); // wait 5s before first chance
+
+  //spawnTrees(15);
 });
 
 // Penalty if not removed
@@ -1161,7 +1199,7 @@ const assets = [
   'img/misc/hand-cursor.png',
   'img/misc/pointer-cursor.png',
   'img/misc/poop.png',
-  'img/misc/paddock-bg4.png',
+  'img/misc/paddock-bg-final3.png',
   'img/misc/tree.png',
   'img/misc/tree2.png',
   'img/misc/bush.png',
