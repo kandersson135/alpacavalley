@@ -54,7 +54,7 @@ const defaultState = {
   level:1, exp:0, wool:0, coins:0, happiness:50, herd:1,
   idleBase:0.2, // wool per second base
   barnLevel:1, autoShear:false, powerupsActive:[], powerupsUsed:0,
-  achievements:{}, unlockedAch:[], lastTick:Date.now()
+  achievements:{}, unlockedAch:[], lastTick:Date.now(), lastPlayed:Date.now()
 }
 
 // New achievements definitions
@@ -1171,13 +1171,69 @@ function updateStoreUI(){
   });
 }
 
-// main loop (1s)
+// // main loop (1s)
+// let last = Date.now();
+// setInterval(()=>{
+//   const now = Date.now();
+//   const dt = (now - last)/1000; if(dt>5) dt=1; // clamp giant gaps
+//   tick(dt); applyPowerupEffects(); last = now; updateUI();
+// },1000);
+
+
+// Main loop
 let last = Date.now();
-setInterval(()=>{
-  const now = Date.now();
-  const dt = (now - last)/1000; if(dt>5) dt=1; // clamp giant gaps
-  tick(dt); applyPowerupEffects(); last = now; updateUI();
-},1000);
+let mainLoop = null;
+
+function startMainLoop() {
+  // Prevent multiple intervals stacking
+  if (mainLoop) clearInterval(mainLoop);
+
+  last = Date.now(); // reset timing reference
+  mainLoop = setInterval(() => {
+    const now = Date.now();
+    let dt = (now - last) / 1000;
+    if (dt > 5) dt = 1; // clamp giant gaps to 1s
+    tick(dt);
+    applyPowerupEffects();
+    last = now;
+    updateUI();
+  }, 1000);
+}
+
+function stopMainLoop() {
+  if (mainLoop) {
+    clearInterval(mainLoop);
+    mainLoop = null;
+  }
+}
+
+// Start it initially
+//startMainLoop();
+
+// check if user leaves tab/comes back
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    console.log("⏸️ Tab inactive — stopping loop");
+    S.lastPlayed = Date.now();
+    stopMainLoop();
+  } else {
+    console.log("▶️ Tab active again");
+
+    const now = Date.now();
+    const diff = (now - S.lastPlayed) / 1000;
+
+    if (diff > 5) {
+      tick(diff); // simulate offline gains
+      log(`While you were away, your herd produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
+      updateUI();
+    }
+
+    startMainLoop(); // restart ticking
+    S.lastPlayed = now;
+  }
+});
+
+
 
 // cleanup expired powerups often
 setInterval(()=>{ applyPowerupEffects(); }, 2000);
@@ -1302,8 +1358,6 @@ function preloadAssets(assets, onComplete, onProgress) {
 }
 
 $(document).ready(() => {
-
-
   // preloadAssets(assetList, () => {
   //   $('#loadingScreen').fadeOut(500);
   //   initGame();
@@ -1329,6 +1383,7 @@ $(document).ready(() => {
     //console.log("✅ All assets loaded");
     $('#loadingScreen').fadeOut(500);
     initGame();
+    startMainLoop();
   }, (loaded, total) => {
     //console.log(`Progress: ${loaded}/${total}`);
     const percent = Math.floor((loaded / total) * 100);
