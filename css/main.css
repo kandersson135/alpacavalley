@@ -523,7 +523,7 @@ footer {
   background-size: cover;
   pointer-events: none;
   opacity: 0.08;
-  animation: sway2 4s ease-in-out infinite;
+  animation: sway 4s ease-in-out infinite;
 }
 
 #alpacaImagesContainer img {
