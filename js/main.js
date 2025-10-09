@@ -1225,7 +1225,8 @@ document.addEventListener("visibilitychange", () => {
     if (diff > 5) {
       tick(diff); // simulate offline gains
       //log(`While you were away, your herd produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
-      log(`Time Warp: You caught up on ${Math.floor(diff)} seconds of wool production 🦙✨`, "info");
+      //log(`Time Warp: You caught up on ${Math.floor(diff)} seconds of wool production 🦙✨`, "info");
+      log(`The herd was busy: produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
       updateUI();
     }
 
