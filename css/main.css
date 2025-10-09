@@ -9,6 +9,9 @@ html, body {
   /* chrome fix :/ */
   overflow-x: hidden;
   overflow-y: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
 button, a, .statusBar h1 {
