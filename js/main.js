@@ -1308,6 +1308,7 @@ const assets = [
   'img/misc/tree2.png',
   'img/misc/bush.png',
   'img/misc/barn.png',
+  'img/misc/light.png',
   // Sounds
   'audio/bg.ogg',
   'audio/alpaca-noise4.mp3',
