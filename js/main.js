@@ -822,18 +822,55 @@ function shear() {
   autosave();
 }
 
-function craft(){
-  if(S.wool < 5){ log('Not enough wool to craft (needs 5).', "error"); return; }
-  S.wool -= 5;
-  let sale = 20 + Math.floor(S.level*2);
+// function craft(){
+//   if(S.wool < 5){ log('Not enough wool to craft (needs 5).', "error"); return; }
+//   S.wool -= 5;
+//   let sale = 20 + Math.floor(S.level*2);
+//
+//   S.powerupsActive.forEach(p=>{
+//     if(p.id==='coin_bonus' && p.meta && p.meta.coinMult){
+//       sale *= p.meta.coinMult;
+//     }
+//   });
+//
+//   S.coins += sale; addExp(6); log(`Crafted yarn and sold for ${sale} coins.`, "normal"); checkAllAch(); autosave();
+// }
 
-  S.powerupsActive.forEach(p=>{
-    if(p.id==='coin_bonus' && p.meta && p.meta.coinMult){
-      sale *= p.meta.coinMult;
+function craft() {
+  const woolPerYarn = 5;
+
+  // 🧶 Check if we have enough wool for at least one yarn
+  if (S.wool < woolPerYarn) {
+    log(`Not enough wool to craft (needs ${woolPerYarn}).`, "error");
+    return;
+  }
+
+  // ✨ Calculate how many yarns we can make
+  const yarnCount = Math.floor(S.wool / woolPerYarn);
+
+  // 🐑 Deduct used wool
+  S.wool -= yarnCount * woolPerYarn;
+
+  // 💰 Base sale value per yarn
+  let salePerYarn = 20 + Math.floor(S.level * 2);
+
+  // 🪙 Apply powerup multipliers
+  S.powerupsActive.forEach(p => {
+    if (p.id === 'coin_bonus' && p.meta && p.meta.coinMult) {
+      salePerYarn *= p.meta.coinMult;
     }
   });
 
-  S.coins += sale; addExp(6); log(`Crafted yarn and sold for ${sale} coins.`, "normal"); checkAllAch(); autosave();
+  // 💵 Total sale amount
+  const totalSale = yarnCount * salePerYarn;
+
+  // 📈 Apply rewards
+  S.coins += totalSale;
+  addExp(6 * yarnCount);
+  log(`Crafted and sold ${yarnCount} yarn for ${totalSale} coins.`, "normal");
+
+  checkAllAch();
+  autosave();
 }
 
 // function buyAlpaca(){
@@ -980,15 +1017,41 @@ function tick(dtSec){
   $('#idleRate').attr('data-title', rate.toFixed(2) + "/s");
 
   // NEW: Auto-Craft effect
+  // if (S.powerupsActive.some(p => p.id === 'auto_craft')) {
+  //   const crafts = Math.floor(S.wool / 5); // every 5 wool
+  //   if(crafts > 0){
+  //     const sale = 20 + Math.floor(S.level*2);
+  //     const crafted = Math.min(crafts, 1); // craft at most once per tick
+  //     S.wool -= 5 * crafted;
+  //     S.coins += sale * crafted;
+  //     addExp(6 * crafted);
+  //     log(`Auto-crafted yarn and sold for ${sale * crafted} coins.`);
+  //   }
+  // }
   if (S.powerupsActive.some(p => p.id === 'auto_craft')) {
-    const crafts = Math.floor(S.wool / 5); // every 5 wool
-    if(crafts > 0){
-      const sale = 20 + Math.floor(S.level*2);
-      const crafted = Math.min(crafts, 1); // craft at most once per tick
+    const crafts = Math.floor(S.wool / 5); // 5 wool = 1 yarn
+    if (crafts > 0) {
+      // 🏡 Cap increases with barn level
+      const maxPerTick = 5 + (S.barnLevel * 2);
+      const crafted = Math.min(crafts, maxPerTick);
+
+      // Base sale value
+      let sale = 20 + Math.floor(S.level * 2);
+
+      // Check for coin bonus powerups
+      S.powerupsActive.forEach(p => {
+        if (p.id === 'coin_bonus' && p.meta && p.meta.coinMult) {
+          sale *= p.meta.coinMult;
+        }
+      });
+
+      // Apply crafting
       S.wool -= 5 * crafted;
-      S.coins += sale * crafted;
+      const totalSale = sale * crafted;
+      S.coins += totalSale;
       addExp(6 * crafted);
-      log(`Auto-crafted yarn and sold for ${sale * crafted} coins.`);
+
+      log(`Auto-crafted ${crafted} yarn and sold for ${totalSale} coins.`, "info");
     }
   }
 
@@ -1017,7 +1080,7 @@ function getAvailablePowerups(){
   if(p.id==='auto_shear') return S.level >= 3;
   if(p.id==='coin_bonus') return S.level >= 5;
   if(p.id==='happy_boost') return S.level >= 10;
-  if(p.id==='auto_craft') return S.level >= 15;
+  if(p.id==='auto_craft') return S.level >= 12;
   if(p.id==='super_shear') return S.level >= 20;
   return false;
   });
@@ -1054,6 +1117,9 @@ function updateTimeDisplay() {
   const realMsPerDay = REAL_MINUTES_PER_DAY * 60 * 1000;
   const dayNumber = Math.floor(elapsedMs / realMsPerDay) + 1;
 
+  // 🌙 Calculate progress through the current in-game day (0 → 1)
+  const dayProgress = (elapsedMs % realMsPerDay) / realMsPerDay;
+
   // log once when a new day starts
   if (dayNumber !== lastLoggedDay) {
     if (lastLoggedDay !== 0) { // skip logging on very first update
@@ -1068,6 +1134,32 @@ function updateTimeDisplay() {
 
   // Update display
   $('#timeDisplay').text(`Day ${dayNumber} — ${timeString}`);
+
+  // 🌗 Update day/night overlay tint
+  updateDayNightCycle(dayProgress);
+}
+
+function updateDayNightCycle(dayProgress) {
+  let opacity = 0;
+
+  if (dayProgress < 0.25) {
+    // early morning
+    opacity = dayProgress * 1.2;
+  } else if (dayProgress < 0.5) {
+    // day
+    opacity = 0;
+  } else if (dayProgress < 0.75) {
+    // evening to night
+    opacity = (dayProgress - 0.5) * 1.8;
+  } else {
+    // night to dawn
+    opacity = (1 - dayProgress) * 1.8;
+  }
+
+  // Clamp between 0 and 0.6
+  opacity = Math.min(Math.max(opacity, 0), 0.6);
+
+  $('#nightOverlay').css('background', `rgba(0, 0, 50, ${opacity})`);
 }
 
 // UI render

@@ -487,6 +487,15 @@ footer {
 .log-error { color: #ff6b6b; }       /* red for errors */
 .log-info { color: #66aaff; }        /* blue for info */
 
+#nightOverlay {
+  position: absolute;
+  inset: 0;                /* Cover entire area */
+  background: rgba(0, 0, 50, 0); /* Start transparent */
+  pointer-events: none;    /* Clicks pass through */
+  z-index: 50;             /* Make sure it's above alpacas but below UI */
+  transition: background 3s linear;
+}
+
 #alpacaImagesContainer {
   background-color: #b0eb93;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%238dd868' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
@@ -512,9 +521,9 @@ footer {
   transform-origin: bottom center; */
 }
 
-#alpacaImagesContainer::before {
-  content: ""; /* Required for pseudo-element to show */
-  position: absolute; /* Overlay on top of the parent */
+/* #alpacaImagesContainer::before {
+  content: "";
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -524,7 +533,7 @@ footer {
   pointer-events: none;
   opacity: 0.08;
   animation: sway 4s ease-in-out infinite;
-}
+} */
 
 #alpacaImagesContainer img {
   cursor: url("../img/misc/hand-cursor.png") 4 4, auto !important;
