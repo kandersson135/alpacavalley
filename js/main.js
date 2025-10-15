@@ -1194,18 +1194,18 @@ function updateUI(){
   //const alpacaCost = 200 * S.herd;
   const alpacaCost = 2000 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
-  $('#buyAlpacaBtn').attr('data-title', `Cost ${alpacaCost} coins`);
+  $('#buyAlpacaBtn').attr('data-title', `Cost ${formatNumber(alpacaCost)} coins`);
 
   //const barnCost = 500 * S.barnLevel;
   const barnRawCost = 1500 * Math.pow(S.barnLevel, 1.5);
   const barnCost = Math.round(barnRawCost / 50) * 50; // round to nearest 50
-  $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
+  $('#upgradeBarn').attr('data-title', `Cost ${formatNumber(barnCost)} coins`);
 
   //const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
   const autoCostlevel = (S.autoShearLevel || 0) + 1;
   const autoRawCost = 1000 * Math.pow(autoCostlevel, 1.8);
   const autoCost = Math.round(autoRawCost / 50) * 50; // round to nearest 50
-  $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
+  $('#upgradeAuto').attr('data-title', `Cost ${formatNumber(autoCost)} coins`);
 
   updateStoreUI();
 }
