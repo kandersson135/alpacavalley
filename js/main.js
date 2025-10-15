@@ -899,7 +899,7 @@ function buyAlpaca() {
     return;
   }
 
-  const cost = 200 * S.herd;
+  const cost = 2000 * S.herd;
   if (S.coins < cost) {
     log('Not enough coins to buy another alpaca.', "error");
     return;
@@ -922,10 +922,11 @@ displayAlpacas();
 
 // Update herd size text when barn is upgraded
 function upgradeBarn(){
-  const cost = 500 * S.barnLevel;
+  //const cost = 500 * S.barnLevel;
+  const cost = 1500 * Math.pow(S.barnLevel, 1.5);
   if(S.coins < cost){
-  log('Not enough coins', "error");
-  return;
+    log('Not enough coins', "error");
+    return;
   }
   S.coins -= cost;
   S.barnLevel++;
@@ -939,7 +940,10 @@ function upgradeBarn(){
 }
 
 function upgradeAuto() {
-  const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
+  //const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
+  const level = (S.autoShearLevel || 0) + 1;
+  const cost = Math.floor(1000 * Math.pow(level, 1.8));
+
   if (S.coins < cost) {
     log('Not enough coins', "error");
     return;
@@ -1181,14 +1185,18 @@ function updateUI(){
 
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
 
-  const alpacaCost = 200 * S.herd;
+  //const alpacaCost = 200 * S.herd;
+  const alpacaCost = 2000 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
   $('#buyAlpacaBtn').attr('data-title', `Cost ${alpacaCost} coins`);
 
-  const barnCost = 500 * S.barnLevel;
+  //const barnCost = 500 * S.barnLevel;
+  const barnCost = 1500 * Math.pow(S.barnLevel, 1.5);
   $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
 
-  const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
+  //const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
+  const autoCostlevel = (S.autoShearLevel || 0) + 1;
+  const autoCost = Math.floor(1000 * Math.pow(autoCostlevel, 1.8));
   $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
   updateStoreUI();
