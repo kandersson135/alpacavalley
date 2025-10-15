@@ -704,9 +704,9 @@ function spawnPoop() {
   poop.click(function() {
     thumpAudio.play();
     $(this).remove();
-    S.coins += 100;   // small coin reward
-    addExp(5);      // small exp reward
-    log("You cleaned up alpaca poop (+100 coins, +5 exp).", "info");
+    S.coins += 1000;   // small coin reward
+    addExp(50);      // small exp reward
+    log("You cleaned up alpaca poop (+1000 coins, +50 exp).", "info");
     autosave();
   });
 
