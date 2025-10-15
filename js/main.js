@@ -73,13 +73,13 @@ const ACH_DEFS = [
 
 // New power-ups store
 const STORE = [
-  {id:'double_wool', title:'Double Wool', cost:100, duration:30, apply: s=>({multWool:2})},
+  {id:'double_wool', title:'Wool Bonus', cost:1000, duration:30, apply: s=>({multWool:2})},
   //{id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({autoShear:true})},
-  {id:'auto_shear', title:'Auto-Shear', cost:200, duration:60, apply: s=>({})},
-  {id:'coin_bonus', title:'Coin Bonus', cost:180, duration:30, apply: s=>({coinMult:2})},
-  {id:'happy_boost', title:'Happiness Boost', cost:120, duration:30, apply: s=>({happyAdd:20})},
-  {id:'super_shear', title:'Super Shear', cost:250, duration:30, apply: s=>({shearMult:3})},
-  {id:'auto_craft', title:'Auto-Craft', cost:300, duration:60, apply: s=>({autoCraft:true})}
+  {id:'auto_shear', title:'Auto-Shear', cost:2000, duration:60, apply: s=>({})},
+  {id:'coin_bonus', title:'Coin Bonus', cost:1800, duration:30, apply: s=>({coinMult:2})},
+  {id:'happy_boost', title:'Happiness Boost', cost:1200, duration:30, apply: s=>({happyAdd:20})},
+  {id:'super_shear', title:'Super Shear', cost:2500, duration:30, apply: s=>({shearMult:3})},
+  {id:'auto_craft', title:'Auto-Craft', cost:3000, duration:60, apply: s=>({autoCraft:true})}
 ];
 
 // const alpacaImages = [
