@@ -759,11 +759,11 @@ setInterval(() => {
 function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.', "normal"); autosave(); }
 
 function feed() {
-  if (S.coins >= 5) {
+  if (S.coins >= 100) {
   addExp(2);
   S.happiness = Math.min(100, S.happiness + 8);
-  S.coins -= 5;
-  log('You fed the herd (-5 coins).', "normal");
+  S.coins -= 100;
+  log('You fed the herd (-100 coins).', "normal");
   autosave();
   } else {
   log("Not enough coins to feed the herd.", "error");
