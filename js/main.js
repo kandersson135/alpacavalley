@@ -923,7 +923,9 @@ displayAlpacas();
 // Update herd size text when barn is upgraded
 function upgradeBarn(){
   //const cost = 500 * S.barnLevel;
-  const cost = 1500 * Math.pow(S.barnLevel, 1.5);
+  //const cost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const rawCost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const cost = Math.round(rawCost / 50) * 50; // round to nearest 50
   if(S.coins < cost){
     log('Not enough coins', "error");
     return;
@@ -941,8 +943,12 @@ function upgradeBarn(){
 
 function upgradeAuto() {
   //const cost = 800 * ((S.autoShearLevel || 0) + 1); // cost scales
+  //const level = (S.autoShearLevel || 0) + 1;
+  //const cost = Math.floor(1000 * Math.pow(level, 1.8));
+
   const level = (S.autoShearLevel || 0) + 1;
-  const cost = Math.floor(1000 * Math.pow(level, 1.8));
+  const rawCost = 1000 * Math.pow(level, 1.8);
+  const cost = Math.round(rawCost / 50) * 50; // round to nearest 50
 
   if (S.coins < cost) {
     log('Not enough coins', "error");
@@ -1140,7 +1146,7 @@ function updateTimeDisplay() {
   $('#timeDisplay').text(`Day ${dayNumber} — ${timeString}`);
 
   // 🌗 Update day/night overlay tint
-  updateDayNightCycle(dayProgress);
+  //updateDayNightCycle(dayProgress);
 }
 
 function updateDayNightCycle(dayProgress) {
@@ -1191,12 +1197,14 @@ function updateUI(){
   $('#buyAlpacaBtn').attr('data-title', `Cost ${alpacaCost} coins`);
 
   //const barnCost = 500 * S.barnLevel;
-  const barnCost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const barnRawCost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const barnCost = Math.round(barnRawCost / 50) * 50; // round to nearest 50
   $('#upgradeBarn').attr('data-title', `Cost ${barnCost} coins`);
 
   //const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
   const autoCostlevel = (S.autoShearLevel || 0) + 1;
-  const autoCost = Math.floor(1000 * Math.pow(autoCostlevel, 1.8));
+  const autoRawCost = 1000 * Math.pow(autoCostlevel, 1.8);
+  const autoCost = Math.round(autoRawCost / 50) * 50; // round to nearest 50
   $('#upgradeAuto').attr('data-title', `Cost ${autoCost} coins`);
 
   updateStoreUI();
@@ -1311,6 +1319,30 @@ function stopMainLoop() {
 //startMainLoop();
 
 // check if user leaves tab/comes back
+// document.addEventListener("visibilitychange", () => {
+//   if (document.hidden) {
+//     console.log("⏸️ Tab inactive — stopping loop");
+//     S.lastPlayed = Date.now();
+//     stopMainLoop();
+//   } else {
+//     console.log("▶️ Tab active again");
+//
+//     const now = Date.now();
+//     const diff = (now - S.lastPlayed) / 1000;
+//
+//     if (diff > 5) {
+//       tick(diff); // simulate offline gains
+//       //log(`While you were away, your herd produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
+//       //log(`Time Warp: You caught up on ${Math.floor(diff)} seconds of wool production 🦙✨`, "info");
+//       log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
+//       updateUI();
+//     }
+//
+//     startMainLoop(); // restart ticking
+//     S.lastPlayed = now;
+//   }
+// });
+
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     console.log("⏸️ Tab inactive — stopping loop");
@@ -1324,13 +1356,22 @@ document.addEventListener("visibilitychange", () => {
 
     if (diff > 5) {
       tick(diff); // simulate offline gains
-      //log(`While you were away, your herd produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
-      //log(`Time Warp: You caught up on ${Math.floor(diff)} seconds of wool production 🦙✨`, "info");
-      log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
+
+      // ✅ Only log if auto shear or powerups are active
+      const hasRobot = S.autoShearLevel && S.autoShearLevel > 0;
+      const hasActivePowerup = S.powerupsActive && S.powerupsActive.length > 0;
+
+      if (hasRobot || hasActivePowerup) {
+        log(
+          `The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`,
+          "info"
+        );
+      }
+
       updateUI();
     }
 
-    startMainLoop(); // restart ticking
+    startMainLoop();
     S.lastPlayed = now;
   }
 });
