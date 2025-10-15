@@ -459,6 +459,7 @@ footer {
   border-top: 2px solid rgba(50, 50, 50, 0.2);
   height: 91%;
   overflow-y: auto;
+  scrollbar-width: thin;
   display: flex;
   padding: 10px;
   flex: 1;
