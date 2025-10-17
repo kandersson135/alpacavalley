@@ -563,7 +563,6 @@ footer {
   position: absolute;
   width: 29px;
   height: 36px;
-  image-rendering: pixelated;
   transition: filter 0.3s, opacity 0.3s, z-index 0.3s;
 }
 
@@ -580,7 +579,6 @@ footer {
 }
 
 .tree {
-  imageRendering: 'pixelated';
   position: absolute;
   display: inline-block;
   pointer-events: none;
@@ -713,7 +711,6 @@ footer {
 }
 
 .poop {
-  image-rendering: pixelated;
   transition: transform 0.2s ease;
 }
 
