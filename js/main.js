@@ -899,7 +899,7 @@ function buyAlpaca() {
     return;
   }
 
-  const cost = 2000 * S.herd;
+  const cost = 7500 * S.herd;
   if (S.coins < cost) {
     log('Not enough coins to buy another alpaca.', "error");
     return;
@@ -1192,7 +1192,7 @@ function updateUI(){
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
 
   //const alpacaCost = 200 * S.herd;
-  const alpacaCost = 2000 * S.herd;
+  const alpacaCost = 7500 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
   $('#buyAlpacaBtn').attr('data-title', `Cost ${formatNumber(alpacaCost)} coins`);
 
