@@ -1620,7 +1620,7 @@ function buildHelpText() {
   const helpText = $(`
     <div>
       <h3>Welcome to Alpaca Valley</h3>
-      <p>Build your dream alpaca farm! Care for your herd, collect wool, craft yarn, and expand your farm as you grow.</p>
+      <p>Care for your herd, collect wool, craft yarn, and expand your farm as you grow.</p>
 
       <ul style="padding-left:18px; margin-top:8px;">
         <li><b>Pet</b> your alpacas to raise their happiness and earn experience.</li>
@@ -1633,6 +1633,15 @@ function buildHelpText() {
       </ul>
 
       <p style="margin-top:10px;"><i>Keep your alpacas happy, expand your valley, and rule the fluff!</i></p>
+
+      <hr style="margin:10px 0; border:none; border-top:1px dashed #6c5671;">
+      <p>
+        This game was created by <a href="https://kimandesson.se/" target="_blank">Kim Andersson</a> as a passion project combining chill gameplay, cute aesthetics, and lighthearted humor.<br><br>
+        🎮 Version: 0.0.8<br>
+        💡 Made with HTML, CSS, JavaScript, and love.<br>
+        🐾 Feedback & ideas are always welcome!<br><br>
+        Thanks for playing!
+      </p>
     </div>
   `).appendTo(wrapper);
 
