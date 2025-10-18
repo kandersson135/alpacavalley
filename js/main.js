@@ -23,6 +23,12 @@ robotAudio.volume = 0.3;
 upgradeAudio.volume = 0.3;
 notificationAudio.volume = 0.3;
 
+const allAudio = [
+  bgAudio, alpacaAudio, alpacaNoise, popAudio,
+  thumpAudio, pootAudio, spawnAudio, upgradeAudio,
+  robotAudio, levelupAudio, notificationAudio
+];
+
 const GAME_VERSION = "0.0.8";
 
 // Function to detect Chrome/Edge
@@ -58,7 +64,8 @@ const defaultState = {
   level:1, exp:0, wool:0, coins:0, happiness:50, herd:1,
   idleBase:0.2, // wool per second base
   barnLevel:1, autoShear:false, powerupsActive:[], powerupsUsed:0,
-  achievements:{}, unlockedAch:[], lastTick:Date.now(), lastPlayed:Date.now()
+  achievements:{}, unlockedAch:[], lastTick:Date.now(), lastPlayed:Date.now(),
+  isMuted: false,
 }
 
 // New achievements definitions
@@ -1489,11 +1496,14 @@ function stopMainLoop() {
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
-    console.log("⏸️ Tab inactive — stopping loop");
+    // mute audio
+    allAudio.forEach(a => { if (a) a.muted = true; });
+
     S.lastPlayed = Date.now();
     stopMainLoop();
   } else {
-    console.log("▶️ Tab active again");
+    // unmute audio
+    allAudio.forEach(a => { if (a) a.muted = S.isMuted; });
 
     const now = Date.now();
     const diff = (now - S.lastPlayed) / 1000;
@@ -1519,8 +1529,6 @@ document.addEventListener("visibilitychange", () => {
     S.lastPlayed = now;
   }
 });
-
-
 
 // cleanup expired powerups often
 setInterval(()=>{ applyPowerupEffects(); }, 2000);
@@ -1689,35 +1697,11 @@ $(document).on("contextmenu", function(e) {
 
 // Sound button
 $('#mute-btn').click(function() {
-  if (bgAudio.muted) {
-    bgAudio.muted = false;
-    alpacaAudio.muted = false;
-    alpacaNoise.muted = false;
-    popAudio.muted = false;
-    thumpAudio.muted = false;
-    pootAudio.muted = false;
-    spawnAudio.muted = false;
-    upgradeAuto.muted = false;
-    robotAudio.muted = false;
-    levelupAudio.muted = false;
-    notificationAudio.muted = false;
-    $(this).removeClass('sound-off');
-    //$(this).text('Sound off');
-  } else {
-    bgAudio.muted = true;
-    alpacaAudio.muted = true;
-    alpacaNoise.muted = true;
-    popAudio.muted = true;
-    thumpAudio.muted = true;
-    pootAudio.muted = true;
-    spawnAudio.muted = true;
-    upgradeAudio.muted = true;
-    robotAudio.muted = true;
-    levelupAudio.muted = true;
-    notificationAudio.muted = true;
-    $(this).addClass('sound-off');
-    //$(this).text('Sound on');
-  }
+  S.isMuted = !S.isMuted;
+  allAudio.forEach(a => { if (a) a.muted = S.isMuted; });
+
+  $(this).toggleClass('sound-off', S.isMuted);
+  autosave();
 });
 
 // Achievements button
