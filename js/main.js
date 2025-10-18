@@ -9,6 +9,7 @@ let spawnAudio = new Audio('audio/poof.wav');
 let upgradeAudio = new Audio('audio/upgrade.mp3');
 let robotAudio = new Audio('audio/robot.mp3');
 let levelupAudio = new Audio('audio/level-up.mp3');
+let notificationAudio = new Audio('audio/notification.mp3');
 bgAudio.volume = 0.3;
 bgAudio.loop = true;
 alpacaAudio.volume = 0.3;
@@ -20,6 +21,7 @@ levelupAudio.volume = 0.3;
 spawnAudio.volume = 0.3;
 robotAudio.volume = 0.3;
 upgradeAudio.volume = 0.3;
+notificationAudio.volume = 0.3;
 
 const GAME_VERSION = "0.0.8";
 
@@ -220,6 +222,8 @@ function showAmbientMessage() {
 
   const m = pickEligibleMessage();
   if (!m) return;
+
+  notificationAudio.play();
 
   if (m.type === 'text') {
     log(m.msg, "info");
@@ -1605,6 +1609,7 @@ const assets = [
   'audio/robot.mp3',
   'audio/poof.wav',
   'audio/level-up.mp3',
+  'audio/notification.mp3',
 ];
 
 // preload assets
@@ -1696,6 +1701,7 @@ $('#mute-btn').click(function() {
     upgradeAuto.muted = false;
     robotAudio.muted = false;
     levelupAudio.muted = false;
+    notificationAudio.muted = false;
     $(this).removeClass('sound-off');
     //$(this).text('Sound off');
   } else {
@@ -1709,6 +1715,7 @@ $('#mute-btn').click(function() {
     upgradeAudio.muted = true;
     robotAudio.muted = true;
     levelupAudio.muted = true;
+    notificationAudio.muted = true;
     $(this).addClass('sound-off');
     //$(this).text('Sound on');
   }
