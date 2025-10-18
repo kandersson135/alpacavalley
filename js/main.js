@@ -1497,13 +1497,13 @@ function stopMainLoop() {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     // mute audio
-    allAudio.forEach(a => { if (a) a.muted = true; });
+    //allAudio.forEach(a => { if (a) a.muted = true; });
 
     S.lastPlayed = Date.now();
     stopMainLoop();
   } else {
     // unmute audio
-    allAudio.forEach(a => { if (a) a.muted = S.isMuted; });
+    //allAudio.forEach(a => { if (a) a.muted = S.isMuted; });
 
     const now = Date.now();
     const diff = (now - S.lastPlayed) / 1000;
@@ -1516,10 +1516,7 @@ document.addEventListener("visibilitychange", () => {
       const hasActivePowerup = S.powerupsActive && S.powerupsActive.length > 0;
 
       if (hasRobot || hasActivePowerup) {
-        log(
-          `The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`,
-          "info"
-        );
+        log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
       }
 
       updateUI();
