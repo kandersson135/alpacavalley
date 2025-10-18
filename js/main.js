@@ -223,11 +223,10 @@ function showAmbientMessage() {
   const m = pickEligibleMessage();
   if (!m) return;
 
-  notificationAudio.play();
-
   if (m.type === 'text') {
     log(m.msg, "info");
   } else if (m.type === 'choice') {
+    notificationAudio.play();
     logWithChoices(m.msg, m.choices || []);
   }
 }
