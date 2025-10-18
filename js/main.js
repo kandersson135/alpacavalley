@@ -21,6 +21,8 @@ spawnAudio.volume = 0.3;
 robotAudio.volume = 0.3;
 upgradeAudio.volume = 0.3;
 
+const GAME_VERSION = "0.0.8";
+
 // Function to detect Chrome/Edge
 function isChromiumBased() {
   const ua = navigator.userAgent;
@@ -1186,7 +1188,7 @@ function updateUI(){
   $('#happyDisplay').text(Math.floor(S.happiness) + '%');
   //$('#herdSize').text(S.herd);
   //$('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
-  $('#versionDisplay').text("Version: 0.0.8");
+  $('#versionDisplay').text(`Version: ${GAME_VERSION}`);
   //$('#timeDisplay').text(new Date().toLocaleString());
 
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
@@ -1637,7 +1639,7 @@ function buildHelpText() {
       <hr style="margin:10px 0; border:none; border-top:1px dashed #6c5671;">
       <p>
         This game was created by <a href="https://kimandesson.se/" target="_blank">Kim Andersson</a> as a passion project combining chill gameplay, cute aesthetics, and lighthearted humor.<br><br>
-        🎮 Version: 0.0.8<br>
+        🎮 Version: ${GAME_VERSION}<br>
         💡 Made with HTML, CSS, JavaScript, and love.<br>
         🐾 Feedback & ideas are always welcome!<br><br>
         Thanks for playing!
