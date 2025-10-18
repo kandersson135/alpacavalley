@@ -1609,18 +1609,49 @@ $('#achiev-btn').click(function() {
 });
 
 // About button
+function buildHelpText() {
+  // Create a wrapper div with a fixed height and scroll
+  const wrapper = document.createElement('div');
+  wrapper.style.maxHeight = '300px';   // adjust as needed
+  wrapper.style.overflowY = 'auto';
+  wrapper.style.paddingRight = '6px';  // prevent scrollbar overlap
+  wrapper.style.textAlign = 'left';    // optional, keeps it clean in Swal
+
+  const helpText = $(`
+    <div>
+      <h3>Welcome to Alpaca Valley</h3>
+      <p>Build your dream alpaca farm! Care for your herd, collect wool, craft yarn, and expand your farm as you grow.</p>
+
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li><b>Pet</b> your alpacas to raise their happiness and earn experience.</li>
+        <li><b>Feed</b> them to keep their mood high and boost production.</li>
+        <li><b>Shear</b> your herd to gather wool — the happier they are, the more they produce.</li>
+        <li><b>Craft Yarn</b> from wool and sell it for coins.</li>
+        <li><b>Buy Alpacas</b> to grow your herd.</li>
+        <li><b>Upgrade</b> your barn and robots to increase capacity and automate production.</li>
+        <li><b>Activate Power-Ups</b> for temporary boosts.</li>
+      </ul>
+
+      <p style="margin-top:10px;"><i>Keep your alpacas happy, expand your valley, and rule the fluff!</i></p>
+    </div>
+  `).appendTo(wrapper);
+
+  return wrapper;
+}
+
 $('#about-btn').click(function() {
   swal({
   title: 'About Alpaca Valley',
-  text: `Welcome to Alpaca Valley — a cozy little world full of fluffy friends!
-
-  This game was created by Kim Andersson as a passion project combining chill gameplay, cute aesthetics, and lighthearted humor.
-
-  🎮 Version: 0.0.8
-  💡 Made with HTML, CSS, JavaScript, and love.
-  🐾 Feedback & ideas are always welcome!
-
-  Thanks for playing!`,
+  content: buildHelpText(),
+  // text: `Welcome to Alpaca Valley — a cozy little world full of fluffy friends!
+  //
+  // This game was created by Kim Andersson as a passion project combining chill gameplay, cute aesthetics, and lighthearted humor.
+  //
+  // 🎮 Version: 0.0.8
+  // 💡 Made with HTML, CSS, JavaScript, and love.
+  // 🐾 Feedback & ideas are always welcome!
+  //
+  // Thanks for playing!`,
     button: 'Close',
   });
 });
