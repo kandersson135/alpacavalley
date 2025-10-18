@@ -84,6 +84,47 @@ const STORE = [
   {id:'auto_craft', title:'Auto-Craft', cost:3000, duration:60, apply: s=>({autoCraft:true})}
 ];
 
+// Regular + choice messages.
+const MESSAGE_POOL = [
+  // --- Plain messages ---
+  { type: 'text', msg: "A cool breeze ruffles the herd's fluff." },
+  { type: 'text', msg: "You hear gentle humming from the paddock." },
+  { type: 'text', msg: "The alpacas blink at you in quiet curiosity." },
+  { type: 'text', msg: "A bell rings in the distance. The valley feels calm." },
+
+  // Optional: gated by state (min level, herd size, etc.)
+  { type: 'text', msg: "Your growing farm draws curious birds.", cond: s => s.level >= 5 },
+  { type: 'text', msg: "The herd seems extra fluffy today.", cond: s => s.herd >= 5 },
+
+  // --- Choice messages ---
+  {
+    type: 'choice',
+    msg: "An alpaca nudges your pocket. What do you do?",
+    choices: [
+      { id: 'pet',  text: 'Pet gently' },
+      { id: 'feed', text: 'Share a snack' },
+      { id: 'ignore', text: 'Ignore' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A merchant strolls by. Do you stop for a chat?",
+    cond: s => s.level >= 3,
+    choices: [
+      { id: 'chat', text: 'Chat' },
+      { id: 'pass', text: 'Pass' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A stray tuft of wool floats by. Do you collect it?",
+    choices: [
+      { id: 'grab', text: 'Grab it' },
+      { id: 'leave', text: 'Let it drift' }
+    ]
+  }
+];
+
 // const alpacaImages = [
 //   'img/alpacas/black.gif',
 //   'img/alpacas/white.gif',
@@ -137,6 +178,82 @@ function loadState(){
 //   const time = new Date().toLocaleTimeString();
 //   $('#messageCenter').prepend(`<div class=\"logEntry\"><small class=\"logTimestamp\">[${time}]</small> ${text}</div>`);
 // }
+
+// message pool stuff
+function randBetweenMs(minMs, maxMs){
+  return Math.floor(minMs + Math.random() * (maxMs - minMs));
+}
+
+function pickEligibleMessage() {
+  // Filter by optional condition
+  const pool = MESSAGE_POOL.filter(m => !m.cond || m.cond(S));
+  if (pool.length === 0) return null;
+  // Simple uniform pick (add weights if you want)
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function showAmbientMessage() {
+  // If a choice group is still visible, wait until it’s answered
+  if ($('.choiceGroup').length > 0) return;
+
+  const m = pickEligibleMessage();
+  if (!m) return;
+
+  if (m.type === 'text') {
+    log(m.msg, "info");
+  } else if (m.type === 'choice') {
+    logWithChoices(m.msg, m.choices || []);
+  }
+}
+
+function scheduleAmbientMessages() {
+  const delay = randBetweenMs(5*60*1000, 10*60*1000); // 5–10 min
+  setTimeout(() => {
+    showAmbientMessage();
+    scheduleAmbientMessages(); // schedule next one
+  }, delay);
+}
+
+// log with choices handler
+$('#messageCenter').on('click', '.logChoice', function() {
+  const choice = $(this).data('choice');
+  const group = $(this).data('group');
+
+  $(`#${group}`).fadeOut(200, function() { $(this).remove(); });
+
+  switch (choice) {
+    case 'feed':
+      feed();
+      log("You share a snack. The herd seems delighted. (+Happiness)", "success");
+      break;
+    case 'pet':
+      pet();
+      log("Soft pats all around. The herd relaxes.", "info");
+      break;
+    case 'ignore':
+      log("You move on. The alpacas stare… unimpressed.", "warning");
+      break;
+
+    case 'chat':
+      grantCoins(25);
+      log("The merchant shares a tip and a small coin. (+25 coins)", "success");
+      break;
+    case 'pass':
+      log("You keep tending the farm. Steady as ever.", "info");
+      break;
+
+    case 'grab':
+      S.wool += 3;
+      log("You catch the tuft! (+3 wool)", "success");
+      break;
+    case 'leave':
+      log("You watch it drift into the sunlight. Peaceful.", "info");
+      break;
+  }
+  updateUI();
+});
+
+
 
 function log(text, type = "normal") {
   const container = $('#messageCenter');
@@ -1389,6 +1506,7 @@ let timeTimer;
 function initGame(){
   updateUI();
   initStoreUI();
+  scheduleAmbientMessages();
   // attach buttons
   $('#petBtn').click(()=>{ pet(); updateUI(); });
   $('#feedBtn').click(()=>{ feed(); updateUI(); });

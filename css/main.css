@@ -386,6 +386,18 @@ footer {
   margin-left: 5px;
 }
 
+/* ipad landscape styles */
+@media only screen
+  and (min-device-width: 810px)
+  and (max-device-width: 1080px)
+  and (orientation: landscape) {
+
+  .rightSidebar ul li {
+    display: inline;
+    margin-left: -3px !important;
+  }
+}
+
 .rightSidebar ul li:first-child {
   margin-left: 0;
 }
@@ -479,6 +491,8 @@ footer {
 
 .logTimestamp {
   color: #999;
+  display: inline-block;
+  width: 70px;
 }
 
 .log-normal { color: #393E46; }
@@ -486,6 +500,25 @@ footer {
 .log-warning { color: #eCCD5A; }     /* yellow/orange for warnings */
 .log-error { color: #ff6b6b; }       /* red for errors */
 .log-info { color: #66aaff; }        /* blue for info */
+
+.logChoice {
+  margin: 4px 6px 0 0;
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f4e3c1;
+  border: 1px solid #d4b78c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.logChoice:hover {
+  background: #ffe9b5;
+  transform: scale(1.05);
+}
+
+.choiceGroup {
+  margin-left: 80px;
+}
 
 #nightOverlay {
   position: absolute;
