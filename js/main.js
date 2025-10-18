@@ -180,6 +180,28 @@ function loadState(){
 // }
 
 // message pool stuff
+function logWithChoices(message, choices = []) {
+  const time = new Date().toLocaleTimeString();
+
+  // Create a unique ID so multiple questions can coexist safely
+  const choiceId = 'choices_' + Date.now();
+
+  // Build choice buttons
+  const choiceHtml = choices.map(c =>
+    `<button class="logChoice btn" data-choice="${c.id}" data-group="${choiceId}">
+      ${c.text}
+    </button>`
+  ).join(' ');
+
+  // Append to message center
+  $('#messageCenter').prepend(`
+    <div class="logEntry">
+      <small class="logTimestamp">[${time}]</small> ${message}<br>
+      <div id="${choiceId}" class="choiceGroup">${choiceHtml}</div>
+    </div>
+  `);
+}
+
 function randBetweenMs(minMs, maxMs){
   return Math.floor(minMs + Math.random() * (maxMs - minMs));
 }
