@@ -1822,9 +1822,6 @@ document.addEventListener("visibilitychange", () => {
     const diff = (now - S.lastPlayed) / 1000;
 
     if (diff > 5) {
-      // Count one offline return
-      S.offlineTicks = (S.offlineTicks || 0) + 1;
-
       tick(diff); // simulate offline gains
 
       // ✅ Only log if auto shear or powerups are active
@@ -1832,6 +1829,8 @@ document.addEventListener("visibilitychange", () => {
       const hasActivePowerup = S.powerupsActive && S.powerupsActive.length > 0;
 
       if (hasRobot || hasActivePowerup) {
+        // Count one offline return
+        S.offlineTicks = (S.offlineTicks || 0) + 1;
         log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds.`, "info");
       }
 
