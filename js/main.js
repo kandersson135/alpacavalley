@@ -103,6 +103,19 @@ const MESSAGE_POOL = [
   { type: 'text', msg: "You hear gentle humming from the paddock." },
   { type: 'text', msg: "The alpacas blink at you in quiet curiosity." },
   { type: 'text', msg: "A bell rings in the distance. The valley feels calm." },
+  { type: 'text', msg: "Sunlight warms the alpacas’ wool. Everything feels peaceful." },
+  { type: 'text', msg: "A lazy cloud drifts by, shaped suspiciously like an alpaca." },
+  { type: 'text', msg: "Soft bleats echo across the valley." },
+  { type: 'text', msg: "The alpacas gather near the fence, staring at something only they can see." },
+  { type: 'text', msg: "A light breeze carries the scent of hay and sunshine." },
+  { type: 'text', msg: "You find a single golden strand of wool — shimmering faintly." },
+  { type: 'text', msg: "Two alpacas seem to be in a staring contest. You’re not sure who’s winning." },
+  { type: 'text', msg: "The valley hums with quiet life." },
+  { type: 'text', msg: "Your herd seems unusually energetic today!" },
+  { type: 'text', msg: "The sky paints the pasture in hues of orange and gold." },
+  { type: 'text', msg: "One alpaca sneezes. Another looks offended." },
+  { type: 'text', msg: "A butterfly lands briefly on an alpaca’s nose. Everyone freezes." },
+  { type: 'text', msg: "You swear one alpaca just winked at you." },
 
   // Optional: gated by state (min level, herd size, etc.)
   { type: 'text', msg: "Your growing farm draws curious birds.", cond: s => s.level >= 5 },
@@ -133,6 +146,76 @@ const MESSAGE_POOL = [
     choices: [
       { id: 'grab', text: 'Grab it' },
       { id: 'leave', text: 'Let it drift' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "An alpaca looks hungry. What do you do?",
+    choices: [
+      { id: 'feedSnack', text: 'Feed some hay' },
+      { id: 'petInstead', text: 'Pet to distract' },
+      { id: 'ignore', text: 'Pretend you didn’t notice' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "You spot a small pile of golden wool near the fence.",
+    choices: [
+      { id: 'collect', text: 'Collect it (+wool)' },
+      { id: 'leave', text: 'Leave it be' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "The merchant from the nearby town returns with new goods.",
+    cond: s => s.level >= 5,
+    choices: [
+      { id: 'buy', text: 'Trade wool for coins' },
+      { id: 'chat', text: 'Chat about the valley' },
+      { id: 'pass', text: 'Politely decline' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A mysterious sparkle appears near the barn.",
+    choices: [
+      { id: 'investigate', text: 'Investigate' },
+      { id: 'ignore', text: 'Leave it for now' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A tiny alpaca foal peeks out from behind the fence!",
+    cond: s => s.herd >= 8,
+    choices: [
+      { id: 'approachFoal', text: 'Approach slowly' },
+      { id: 'watchFoal', text: 'Observe quietly' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A rainbow stretches over the valley — it’s breathtaking.",
+    cond: s => s.level >= 10,
+    choices: [
+      { id: 'admire', text: 'Take a moment to admire' },
+      { id: 'shearRainbow', text: 'Use the moment to shear wool' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A pink alpaca appears at the edge of your field, shimmering softly.",
+    cond: s => s.level >= 15,
+    choices: [
+      { id: 'approachPink', text: 'Approach carefully' },
+      { id: 'blink', text: 'You must be imagining things...' }
+    ]
+  },
+  {
+    type: 'choice',
+    msg: "A shooting star flashes above Alpaca Valley.",
+    choices: [
+      { id: 'wish', text: 'Make a wish' },
+      { id: 'ignoreStar', text: 'Stay grounded' }
     ]
   }
 ];
@@ -254,9 +337,11 @@ $('#messageCenter').on('click', '.logChoice', function() {
   const choice = $(this).data('choice');
   const group = $(this).data('group');
 
+  // hide/remove the whole choice row for this message
   $(`#${group}`).fadeOut(200, function() { $(this).remove(); });
 
   switch (choice) {
+    // --- your existing ones ---
     case 'feed':
       feed();
       log("You share a snack. The herd seems delighted. (+Happiness)", "success");
@@ -268,7 +353,6 @@ $('#messageCenter').on('click', '.logChoice', function() {
     case 'ignore':
       log("You move on. The alpacas stare… unimpressed.", "warning");
       break;
-
     case 'chat':
       grantCoins(25);
       log("The merchant shares a tip and a small coin. (+25 coins)", "success");
@@ -276,19 +360,134 @@ $('#messageCenter').on('click', '.logChoice', function() {
     case 'pass':
       log("You keep tending the farm. Steady as ever.", "info");
       break;
-
     case 'grab':
       S.wool += 3;
-      log("You catch the tuft! (+3 wool)", "success");
+      addExp(2);
+      log("You catch the tuft! (+3 wool, +2 XP)", "success");
       break;
     case 'leave':
       log("You watch it drift into the sunlight. Peaceful.", "info");
       break;
+    case 'collect':
+      const woolFound = 10 + Math.floor(Math.random() * 10);
+      S.wool += woolFound;
+      addExp(4);
+      log(`You gather some soft wool from the grass (+${woolFound} wool).`, "success");
+      break;
+
+    // --- new: hungry alpaca prompt ---
+    case 'feedSnack':
+      S.happiness = Math.min(100, S.happiness + 5);
+      addExp(3);
+      log("The alpaca munches happily. Happiness +5 💕", "success");
+      break;
+    case 'petInstead':
+      S.happiness = Math.min(100, S.happiness + 2);
+      addExp(2);
+      log("You pet the alpaca instead. Its ears wiggle appreciatively.", "normal");
+      break;
+
+    // --- new: merchant trade option ---
+    case 'buy': {
+      if (S.wool >= 5) {
+        S.wool -= 5;
+        const sale = 50 + Math.floor(S.level * 4);
+        S.coins += sale;
+        addExp(6);
+        log(`You trade 5 wool for ${sale} coins. The merchant smiles warmly. 💰`, "success");
+      } else {
+        log("You don’t have enough wool to trade.", "error");
+      }
+      break;
+    }
+
+    // --- new: sparkle near barn ---
+    case 'investigate': {
+      const found = Math.random() < 0.5;
+      if (found) {
+        const coins = 100 + Math.floor(Math.random() * 50);
+        S.coins += coins;
+        addExp(8);
+        log(`You found ${coins} coins hidden under a tuft of wool! 🪙`, "success");
+      } else {
+        log("You find… nothing. Just sparkly dust.", "info");
+      }
+      break;
+    }
+
+    // --- new: foal event ---
+    case 'approachFoal':
+      if (Math.random() < 0.7) {
+        S.happiness = Math.min(100, S.happiness + 6);
+        addExp(5);
+        log("The tiny alpaca lets you pet its nose. Adorable! Happiness +6 💕", "success");
+      } else {
+        log("The foal trots away playfully. Maybe next time.", "info");
+      }
+      break;
+    case 'watchFoal':
+      addExp(2);
+      log("You quietly watch the foal explore. A calm moment of peace.", "normal");
+      break;
+
+    // --- new: rainbow event ---
+    case 'admire':
+      S.happiness = Math.min(100, S.happiness + 4);
+      addExp(3);
+      log("You take a deep breath and admire the view. Happiness +4 🌈", "success");
+      break;
+    case 'shearRainbow': {
+      const rainbowWool = 30 + Math.floor(S.level * 2);
+      S.wool += rainbowWool;
+      addExp(5);
+      log(`You quickly shear ${rainbowWool} rainbow-tinted wool. Magical! 🧶✨`, "success");
+      break;
+    }
+
+    // --- new: pink alpaca (level-gated event in your pool) ---
+    case 'approachPink': {
+      const chance = Math.random();
+      if (chance < 0.3) {
+        log("The pink alpaca vanishes in a shimmer of light. Was it ever real?", "info");
+      } else {
+        S.happiness = Math.min(100, S.happiness + 10);
+        addExp(15);
+        log("The pink alpaca nuzzles your hand. A rare and lucky encounter! 💖", "success");
+      }
+      break;
+    }
+    case 'blink':
+      log("You blink — and it’s gone. Maybe you need a nap.", "normal");
+      break;
+
+    // --- new: shooting star ---
+    case 'wish': {
+      const r = Math.random();
+      if (r < 0.33) {
+        S.coins += 200;
+        log("Your wish comes true! +200 coins 💫", "success");
+      } else if (r < 0.66) {
+        S.wool += 100;
+        log("A bundle of starlit wool appears in your barn! +100 wool 🌟", "success");
+      } else {
+        S.happiness = Math.min(100, S.happiness + 10);
+        log("You feel a warm, happy glow inside. Happiness +10 ✨", "success");
+      }
+      addExp(5);
+      break;
+    }
+    case 'ignoreStar':
+      log("You ignore the star. The night remains quiet and still.", "info");
+      break;
+
+    default:
+      log("The moment passes quietly.", "normal");
+      break;
   }
+
   updateUI();
+  autosave();
 });
-
-
 
 function log(text, type = "normal") {
   const container = $('#messageCenter');
