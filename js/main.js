@@ -95,7 +95,6 @@ const ACH_DEFS = [
   {id:'use_10_power', title:'Power User', desc:'Use 10 power-ups', check: s=>s.powerupsUsed>=10},
 
   {id:'herd_20', title:'Valley Guardian', desc:'Own 20 alpacas', check:s=>s.herd>=20},
-  {id:'pink_unlock', title:'Rare Discovery', desc:'Unlock a pink alpaca', check:s=>s.level>=15 && s.herd>=1},
   {id:'herd_full', title:'Max Capacity', desc:'Fill your entire barn with alpacas', check:s=>s.herd>=s.barnLevel*5},
 
   {id:'coins_10k', title:'Wealthy Shepherd', desc:'Reach 10,000 coins', check:s=>s.coins>=10000},
