@@ -1568,6 +1568,17 @@ const dayMessages = [
   "☁️ The alpacas yawn and stretch.",
   "🌤️ Another peaceful morning on the farm.",
   "🌾 The fields shimmer under the morning sun.",
+  "🪶 A soft breeze carries the scent of hay through the paddock.",
+  "🌺 The herd hums quietly as the sun rises over the valley.",
+  "🐦 Birds sing above the barn — it’s a fresh new morning.",
+  "🍃 The air is cool, and your alpacas are ready for the day.",
+  "🌈 The morning mist fades — a calm day awaits.",
+  "🕊️ Peace settles over Alpaca Valley as the day begins.",
+  "🧺 You hear the gentle rustle of wool and the promise of a good day.",
+  "💧 Dew sparkles on the grass as the alpacas greet the dawn.",
+  "🐾 The herd gathers for their morning snack — another day of fluff and joy.",
+  "🌻 The valley awakens slowly, bathed in golden light.",
+  "🍞 You enjoy a warm cup of coffee while the alpacas start to graze.",
 ];
 
 function updateTimeDisplay() {
