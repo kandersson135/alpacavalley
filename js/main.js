@@ -907,19 +907,72 @@ setInterval(() => {
 }, 5000);
 
 // Actions
-function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.', "normal"); autosave(); }
+function pet() {
+  // If already max happiness
+  if (S.happiness >= 100) {
+    log("Your alpacas are already content and fluffy!", "info");
+    return;
+  }
+
+  // Calculate diminishing returns with larger herds
+  const happinessGain = Math.max(1, 5 - Math.floor(S.herd / 5)); // +5 for small herds, less for big ones
+  const expGain = Math.ceil(3 + S.herd * 0.3); // scale XP with herd size
+
+  // Apply effects
+  S.happiness = Math.min(100, S.happiness + happinessGain);
+  addExp(expGain);
+
+  log(`You spent time petting your alpacas (+${happinessGain}% happiness, +${expGain} XP).`, "normal");
+  autosave();
+}
+
+
+// function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.', "normal"); autosave(); }
 
 function feed() {
-  if (S.coins >= 100) {
-  addExp(2);
-  S.happiness = Math.min(100, S.happiness + 8);
-  S.coins -= 100;
-  log('You fed the herd (-100 coins).', "normal");
-  autosave();
-  } else {
-  log("Not enough coins to feed the herd.", "error");
+  // Cost scales with herd size
+  const costPerAlpaca = 25;
+  const totalCost = costPerAlpaca * S.herd;
+
+  // If happiness is already maxed
+  if (S.happiness >= 100) {
+    log("Your alpacas are already perfectly happy!", "info");
+    return;
   }
+
+  // Not enough coins
+  if (S.coins < totalCost) {
+    log(`Not enough coins to feed ${S.herd} alpacas. (${totalCost} needed)`, "error");
+    return;
+  }
+
+  // Deduct cost
+  S.coins -= totalCost;
+
+  // Apply happiness gain (decreasing effect for large herds)
+  const happinessGain = Math.max(2, 15 - Math.floor(S.herd / 2));
+  S.happiness = Math.min(100, S.happiness + happinessGain);
+
+  // Add experience based on herd size
+  const expGain = Math.ceil(S.herd * 1.5);
+  addExp(expGain);
+
+  log(`You fed your ${S.herd} alpacas (-${totalCost} coins, +${happinessGain}% happiness).`, "normal");
+  autosave();
 }
+
+
+// function feed() {
+//   if (S.coins >= 100) {
+//   addExp(2);
+//   S.happiness = Math.min(100, S.happiness + 8);
+//   S.coins -= 100;
+//   log('You fed the herd (-100 coins).', "normal");
+//   autosave();
+//   } else {
+//   log("Not enough coins to feed the herd.", "error");
+//   }
+// }
 
 // function shear(){
 //   const base = 1 + Math.floor(S.herd * 0.8) + Math.floor(S.level/2);
@@ -1212,13 +1265,14 @@ function tick(dtSec){
       S.coins += totalSale;
       addExp(6 * crafted);
 
-      log(`Auto-crafted ${crafted} yarn and sold for ${totalSale} coins.`, "info");
+      //log(`Auto-crafted ${crafted} yarn and sold for ${totalSale} coins.`, "info");
     }
   }
 
   // happiness slowly decays if not fed
-  S.happiness = Math.max(0, S.happiness - dtSec*0.1);
-  addExp( Math.floor(dtSec * 0.2) );
+  S.happiness = Math.max(0, S.happiness - dtSec*0.05);
+  //addExp( Math.floor(dtSec * 0.2) );
+  //addExp(dtSec * 0.2);
 }
 
 // achievements
@@ -1357,6 +1411,10 @@ function updateUI(){
   const autoRawCost = 1000 * Math.pow(autoCostlevel, 1.8);
   const autoCost = Math.round(autoRawCost / 50) * 50; // round to nearest 50
   $('#upgradeAuto').attr('data-title', `Cost ${formatNumber(autoCost)} coins`);
+
+  const costPerAlpaca = 25;
+  const totalFeedCost = costPerAlpaca * S.herd;
+  $('#feedBtn').attr('data-title', `Cost ${formatNumber(totalFeedCost)} coins`);
 
   updateStoreUI();
 }
@@ -1516,7 +1574,7 @@ document.addEventListener("visibilitychange", () => {
       const hasActivePowerup = S.powerupsActive && S.powerupsActive.length > 0;
 
       if (hasRobot || hasActivePowerup) {
-        log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds 🦙✨`, "info");
+        log(`The herd was busy: Produced wool for ${Math.floor(diff)} seconds.`, "info");
       }
 
       updateUI();
