@@ -1528,7 +1528,7 @@ function checkAllAch(){
       S.achievements[a.id] = {unlocked:true, time:Date.now()}; S.unlockedAch.push(a.id);
       log(`Achievement unlocked: ${a.title}`, "success");
       // small reward
-      S.coins += 100; S.wool += 10; updateUI();
+      // S.coins += 100; S.wool += 10; updateUI();
     }
   });
   updateUI();
