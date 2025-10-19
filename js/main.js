@@ -69,6 +69,16 @@ const defaultState = {
   barnLevel:1, autoShear:false, powerupsActive:[], powerupsUsed:0,
   achievements:{}, unlockedAch:[], lastTick:Date.now(), lastPlayed:Date.now(),
   isMuted: false,
+
+  // 🆕 tracking stats
+  totalCrafted: 0,
+  totalPowerupTime: 0,
+  feedCount: 0,
+  petCount: 0,
+  playTime: 0,
+  offlineTicks: 0,
+  poopCleaned: 0,
+  alpacaClicks: 0
 }
 
 // New achievements definitions
@@ -82,7 +92,29 @@ const ACH_DEFS = [
   {id:'wool_500', title:'Wool Tycoon', desc:'Collect 500 wool total', check: s=>s.wool>=500},
   {id:'level_20', title:'Elite Farmer', desc:'Reach farm level 20', check: s=>s.level>=20},
   {id:'coins_100k', title:'Millionaire', desc:'Reach 100k coins', check: s=>s.coins>=100000},
-  {id:'use_10_power', title:'Power User', desc:'Use 10 power-ups', check: s=>s.powerupsUsed>=10}
+  {id:'use_10_power', title:'Power User', desc:'Use 10 power-ups', check: s=>s.powerupsUsed>=10},
+
+  {id:'herd_20', title:'Valley Guardian', desc:'Own 20 alpacas', check:s=>s.herd>=20},
+  {id:'pink_unlock', title:'Rare Discovery', desc:'Unlock a pink alpaca', check:s=>s.level>=15 && s.herd>=1},
+  {id:'herd_full', title:'Max Capacity', desc:'Fill your entire barn with alpacas', check:s=>s.herd>=s.barnLevel*5},
+
+  {id:'coins_10k', title:'Wealthy Shepherd', desc:'Reach 10,000 coins', check:s=>s.coins>=10000},
+  {id:'coins_1m', title:'Wool Magnate', desc:'Accumulate 1,000,000 coins', check:s=>s.coins>=1000000},
+  {id:'sell_100', title:'Seasoned Merchant', desc:'Craft and sell 100 yarns', check:s=>s.totalCrafted && s.totalCrafted>=100},
+
+  {id:'auto_robot', title:'Mechanical Friend', desc:'Purchase your first shearing robot', check:s=>s.autoShearLevel>=1},
+  {id:'auto_robot_5', title:'Factory Farmer', desc:'Own 5 shearing robots', check:s=>s.autoShearLevel>=5},
+  {id:'power_long', title:'Energized', desc:'Have a power-up active for over 2 minutes total', check:s=>s.totalPowerupTime && s.totalPowerupTime>=120},
+
+  {id:'happy_100', title:'Herd Whisperer', desc:'Reach 100% happiness', check:s=>s.happiness>=100},
+  {id:'feed_50', title:'Snack Distributor', desc:'Feed the herd 50 times', check:s=>s.feedCount && s.feedCount>=50},
+  {id:'pet_100', title:'Soft Touch', desc:'Pet the alpacas 100 times', check:s=>s.petCount && s.petCount>=100},
+
+  {id:'idle_1h', title:'Time Well Spent', desc:'Play for 1 hour total', check:s=>s.playTime && s.playTime>=3600},
+  {id:'offline_gain', title:'The Lazy Way', desc:'Earn wool while away from the game', check:s=>s.offlineTicks && s.offlineTicks>0},
+
+  {id:'clean_10', title:'Poop Patrol', desc:'Clean up 10 poops', check:s=>s.poopCleaned && s.poopCleaned>=10},
+  {id:'stress_10', title:'Too Much Petting', desc:'Stress the alpacas 10 times by clicking them', check:s=>s.alpacaClicks && s.alpacaClicks>=10},
 ];
 
 // New power-ups store
@@ -711,6 +743,8 @@ function displayAlpacas(){
 
       // Reduce happiness for stressing the alpaca
       S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
+      S.alpacaClicks++; // 🆕 count clicks
+      checkAllAch();
       log("The alpaca got stressed! Happiness -3", "warning");
 
       el.stop(true);
@@ -947,6 +981,8 @@ function addSingleAlpaca() {
 
     // Reduce happiness for stressing the alpaca
     S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
+    S.alpacaClicks++; // 🆕 count clicks
+    checkAllAch();
     log("The alpaca got stressed! Happiness -3", "warning");
 
     el.stop(true);
@@ -1059,6 +1095,8 @@ function spawnPoop() {
     $(this).remove();
     S.coins += 1000;   // small coin reward
     addExp(50);      // small exp reward
+    S.poopCleaned++; // 🆕
+    checkAllAch();
     log("You cleaned up alpaca poop (+1000 coins, +50 exp).", "info");
     autosave();
   });
@@ -1123,7 +1161,8 @@ function pet() {
   // Apply effects
   S.happiness = Math.min(100, S.happiness + happinessGain);
   addExp(expGain);
-
+  S.petCount++;  // 🆕 track pets
+  checkAllAch();
   log(`You spent time petting your alpacas (+${happinessGain}% happiness, +${expGain} XP).`, "normal");
   autosave();
 }
@@ -1158,6 +1197,9 @@ function feed() {
   // Add experience based on herd size
   const expGain = Math.ceil(S.herd * 1.5);
   addExp(expGain);
+
+  S.feedCount++;  // 🆕 track feedings
+  checkAllAch();
 
   log(`You fed your ${S.herd} alpacas (-${totalCost} coins, +${happinessGain}% happiness).`, "normal");
   autosave();
@@ -1273,6 +1315,8 @@ function craft() {
   // 📈 Apply rewards
   S.coins += totalSale;
   addExp(6 * yarnCount);
+
+  S.totalCrafted += yarnCount; // 🆕 track total crafted
   log(`Crafted and sold ${yarnCount} yarn for ${totalSale} coins.`, "normal");
 
   checkAllAch();
@@ -1712,6 +1756,15 @@ function startMainLoop() {
     const now = Date.now();
     let dt = (now - last) / 1000;
     if (dt > 5) dt = 1; // clamp giant gaps to 1s
+
+    // Track active playtime
+    S.playTime += dt;
+
+    // Track power-up active time (any powerup running)
+    if (S.powerupsActive && S.powerupsActive.length > 0) {
+      S.totalPowerupTime += dt;
+    }
+
     tick(dt);
     applyPowerupEffects();
     last = now;
@@ -1769,6 +1822,9 @@ document.addEventListener("visibilitychange", () => {
     const diff = (now - S.lastPlayed) / 1000;
 
     if (diff > 5) {
+      // Count one offline return
+      S.offlineTicks = (S.offlineTicks || 0) + 1;
+
       tick(diff); // simulate offline gains
 
       // ✅ Only log if auto shear or powerups are active
