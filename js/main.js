@@ -24,10 +24,13 @@ upgradeAudio.volume = 0.3;
 notificationAudio.volume = 0.3;
 
 const allAudio = [
-  bgAudio, alpacaAudio, alpacaNoise, popAudio,
-  thumpAudio, pootAudio, spawnAudio, upgradeAudio,
-  robotAudio, levelupAudio, notificationAudio
+  bgAudio, alpacaAudio, alpacaNoise, popAudio, thumpAudio,
+  pootAudio, spawnAudio, upgradeAudio, robotAudio,
+  levelupAudio, notificationAudio
 ];
+function setAllAudioMuted(mute) {
+  allAudio.forEach(a => { if (a) a.muted = mute; });
+}
 
 const GAME_VERSION = "0.0.8";
 
@@ -1608,6 +1611,9 @@ function initGame(){
   bgAudio.play();
   alpacaAudio.play();
 
+  setAllAudioMuted(S.isMuted);
+  $('#mute-btn').toggleClass('sound-off', S.isMuted);
+
   // --- Start your farm clock ---
   if (timeTimer) clearInterval(timeTimer); // prevent duplicates
   updateTimeDisplay(); // show it immediately
@@ -1751,10 +1757,9 @@ $(document).on("contextmenu", function(e) {
 });
 
 // Sound button
-$('#mute-btn').click(function() {
+$('#mute-btn').on('click', function () {
   S.isMuted = !S.isMuted;
-  allAudio.forEach(a => { if (a) a.muted = S.isMuted; });
-
+  setAllAudioMuted(S.isMuted);
   $(this).toggleClass('sound-off', S.isMuted);
   autosave();
 });
