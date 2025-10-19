@@ -114,7 +114,7 @@ const ACH_DEFS = [
   {id:'offline_gain', title:'The Lazy Way', desc:'Earn wool while away from the game', check:s=>s.offlineTicks && s.offlineTicks>0},
 
   {id:'clean_10', title:'Poop Patrol', desc:'Clean up 10 poops', check:s=>s.poopCleaned && s.poopCleaned>=10},
-  {id:'stress_10', title:'Too Much Petting', desc:'Stress the alpacas 10 times by clicking them', check:s=>s.alpacaClicks && s.alpacaClicks>=10},
+  {id:'stress_10', title:'Too Much Stress', desc:'Stress the alpacas 10 times by clicking them', check:s=>s.alpacaClicks && s.alpacaClicks>=10},
 ];
 
 // New power-ups store
