@@ -1408,6 +1408,7 @@ function upgradeAuto() {
   S.autoShearLevel = (S.autoShearLevel || 0) + 1;
   log(`You bought a shearing robot! Idle wool increased (robots: ${S.autoShearLevel}).`, "success");
   robotAudio.play();
+  checkAllAch();
   autosave();
 }
 
