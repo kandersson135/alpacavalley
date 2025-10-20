@@ -1645,7 +1645,7 @@ function updateUI(){
   // $('#coinsDisplay').text(Math.floor(S.coins));
   $('#coinsDisplay').text(formatNumber(S.coins));
   $('#storeCoins').text(Math.floor(S.coins));
-  $('#happyDisplay').text(Math.floor(S.happiness) + '%');
+  $('#happyDisplay').text(Math.round(S.happiness) + '%');
   //$('#herdSize').text(S.herd);
   //$('#idleRate').text((S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2));
   $('#versionDisplay').text(`Version: ${GAME_VERSION}`);
