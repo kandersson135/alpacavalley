@@ -123,8 +123,8 @@ const STORE = [
   {id:'auto_shear', title:'Auto-Shear', cost:2000, duration:60, apply: s=>({})},
   {id:'coin_bonus', title:'Coin Bonus', cost:1800, duration:30, apply: s=>({coinMult:2})},
   {id:'happy_boost', title:'Happiness Boost', cost:1200, duration:30, apply: s=>({happyAdd:20})},
-  {id:'super_shear', title:'Super Shear', cost:2500, duration:30, apply: s=>({shearMult:3})},
-  {id:'auto_craft', title:'Auto-Craft', cost:3000, duration:60, apply: s=>({autoCraft:true})}
+  {id:'auto_craft', title:'Auto-Craft', cost:3000, duration:60, apply: s=>({autoCraft:true})},
+  {id:'super_shear', title:'Super Shear', cost:2500, duration:30, apply: s=>({shearMult:3})}
 ];
 
 // Regular + choice messages.
@@ -1541,7 +1541,7 @@ function getAvailablePowerups(){
   if(p.id==='auto_shear') return S.level >= 3;
   if(p.id==='coin_bonus') return S.level >= 5;
   if(p.id==='happy_boost') return S.level >= 10;
-  if(p.id==='auto_craft') return S.level >= 12;
+  if(p.id==='auto_craft') return S.level >= 15;
   if(p.id==='super_shear') return S.level >= 20;
   return false;
   });
