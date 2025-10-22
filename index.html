@@ -16,15 +16,18 @@
 </head>
 <body>
 
-  <div id="loadingScreen">
-    <div class="loading-box">
-      <div class="alpaca-pixel"><img src="img/alpacas/white2.gif"></div>
-      <div class="loading-text">Loading...</div>
-      <div class="loading-bar">
-        <div class="loading-fill"></div>
-      </div>
+  <!-- Loading Overlay -->
+  <div id="loadingScreen" aria-hidden="false">
+    <div class="loading-scene">
+      <img class="alpaca-logo" src="img/alpacas/white2.gif" alt="Alpaca" />
+      <div class="loading-text">Loading... 0%</div>
+    </div>
+
+    <div class="loading-bar-horizon" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="loading-fill"></div>
     </div>
   </div>
+
 
   <div class="parent">
     <div class="statusBar">

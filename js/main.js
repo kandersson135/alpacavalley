@@ -1988,12 +1988,12 @@ $(document).ready(() => {
   //   $('.loading-text').text(`Loading... ${percent}%`);
   // });
 
-  // preloadAssets(assetList, () => {
+  // preloadAssets(assets, () => {
   //   // Artificial delay for testing
   //   setTimeout(() => {
   //     $('#loadingScreen').fadeOut(500);
   //     initGame();
-  //   }, 2000); // 2000ms = 2 seconds
+  //   }, 20000); // 2000ms = 2 seconds
   // }, (loaded, total) => {
   //   const percent = Math.floor((loaded / total) * 100);
   //   $('.loading-fill').css('width', percent + '%');
