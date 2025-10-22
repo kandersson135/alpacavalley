@@ -1348,7 +1348,7 @@ function buyAlpaca() {
     return;
   }
 
-  const cost = 7500 * S.herd;
+  const cost = 12500 * S.herd;
   if (S.coins < cost) {
     log('Not enough coins to buy another alpaca.', "error");
     return;
@@ -1373,7 +1373,7 @@ displayAlpacas();
 function upgradeBarn(){
   //const cost = 500 * S.barnLevel;
   //const cost = 1500 * Math.pow(S.barnLevel, 1.5);
-  const rawCost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const rawCost = 3000 * Math.pow(S.barnLevel, 1.5);
   const cost = Math.round(rawCost / 50) * 50; // round to nearest 50
   if(S.coins < cost){
     log('Not enough coins', "error");
@@ -1396,7 +1396,7 @@ function upgradeAuto() {
   //const cost = Math.floor(1000 * Math.pow(level, 1.8));
 
   const level = (S.autoShearLevel || 0) + 1;
-  const rawCost = 1000 * Math.pow(level, 1.8);
+  const rawCost = 7500 * Math.pow(level, 1.8);
   const cost = Math.round(rawCost / 50) * 50; // round to nearest 50
 
   if (S.coins < cost) {
@@ -1651,18 +1651,18 @@ function updateUI(){
   //$('#idleRate').attr('data-title', (S.idleBase * S.herd * (1 + (S.barnLevel-1)*0.2) + (S.autoShear?0.5:0)).toFixed(2) + "/s");
 
   //const alpacaCost = 200 * S.herd;
-  const alpacaCost = 7500 * S.herd;
+  const alpacaCost = 12500 * S.herd;
   //$('#buyAlpacaBtn').text(`Buy Alpaca (${alpacaCost} coins)`);
   $('#buyAlpacaBtn').attr('data-title', `Cost ${formatNumber(alpacaCost)} coins`);
 
   //const barnCost = 500 * S.barnLevel;
-  const barnRawCost = 1500 * Math.pow(S.barnLevel, 1.5);
+  const barnRawCost = 3000 * Math.pow(S.barnLevel, 1.5);
   const barnCost = Math.round(barnRawCost / 50) * 50; // round to nearest 50
   $('#upgradeBarn').attr('data-title', `Cost ${formatNumber(barnCost)} coins`);
 
   //const autoCost = 800 * ((S.autoShearLevel || 0) + 1);
   const autoCostlevel = (S.autoShearLevel || 0) + 1;
-  const autoRawCost = 1000 * Math.pow(autoCostlevel, 1.8);
+  const autoRawCost = 7500 * Math.pow(autoCostlevel, 1.8);
   const autoCost = Math.round(autoRawCost / 50) * 50; // round to nearest 50
   $('#upgradeAuto').attr('data-title', `Cost ${formatNumber(autoCost)} coins`);
 
