@@ -1886,9 +1886,9 @@ function initGame(){
 
   // initial achievements check
   checkAllAch();
-  // autosave every 10s
+  // autosave every 60s
   if(autosaveTimer) clearInterval(autosaveTimer);
-  autosaveTimer = setInterval(()=>{ saveState(); }, 10000);
+  autosaveTimer = setInterval(()=>{ saveState(); log("Game saved");}, 60000);
 }
 
 const assets = [
