@@ -588,11 +588,31 @@ footer {
   z-index: 4;
 }
 
-.alpaca {
+/* .alpaca {
   position: absolute;
   width: 29px;
   height: 36px;
   transition: filter 0.3s, opacity 0.3s, z-index 0.3s;
+} */
+
+.alpaca {
+  position: absolute;
+  width: 29px; height: 36px;
+  will-change: transform, filter;
+  pointer-events: auto;
+}
+
+.alpaca--spawn-in {
+  transition: opacity 400ms ease;
+  opacity: 1;
+}
+
+.spawn-poof {
+  position: absolute;
+  width: 31px; height: 26px;
+  pointer-events: none;
+  opacity: 1;
+  will-change: transform, opacity, width, height;
 }
 
 .barn {
@@ -724,7 +744,6 @@ footer {
   100% { transform: rotate(0deg); }
 }
 
-
 .alpaca-anim {
   animation: bounce 1.5s infinite;
 }
@@ -746,6 +765,34 @@ footer {
 .poop:hover {
   transform: scale(1.2);
 }
+
+/* emote */
+.emote {
+  position: absolute;
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.35));
+  will-change: transform, opacity;
+}
+
+
+/* toast */
+.toast {
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+}
+.toast.on{transform:translateY(0); opacity:1;}
 
 /* tooltip */
 .tooltip {

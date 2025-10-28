@@ -56,10 +56,14 @@ $(document).one('click', function() {
 });
 
 // Attach event to all buttons
+let _popLast = 0;
 $(document).on("mousedown", "button, a", function() {
-  // Reset sound to start (in case it overlaps)
-  popAudio.currentTime = 0;
-  popAudio.play();
+  const now = performance.now();
+  if (now - _popLast > 80) { // 12.5 plays/sec max
+    popAudio.currentTime = 0;
+    popAudio.play().catch(()=>{});
+    _popLast = now;
+  }
 });
 
 // -- Game data & defaults
@@ -543,6 +547,40 @@ function log(text, type = "normal") {
   container.scrollTop(0);
 }
 
+// popEmote
+function popEmote(x, y, char) {
+  const e = document.createElement('div');
+  e.className = 'emote';
+  e.textContent = char;
+  e.style.transform = `translate3d(${x}px,${y-12}px,0)`;
+  document.getElementById('alpacaImagesContainer').appendChild(e);
+  const t0 = performance.now(); (function loop(t){
+    const p = Math.min(1, (t - t0)/800);
+    e.style.opacity = String(1 - p);
+    e.style.transform = `translate3d(${x}px,${y-12-20*p}px,0)`;
+    if (p < 1) requestAnimationFrame(loop); else e.remove();
+  })(t0);
+}
+
+function emoteAll(char) {
+  for (const a of Alpacas) {
+    popEmote(
+      a.x + 24 + (Math.random() - 0.5) * 10,
+      a.y - 5 + (Math.random() - 0.5) * 10,
+      char
+    );
+  }
+}
+
+// toast message
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.classList.add('on'), 10);
+  setTimeout(()=>{ t.classList.remove('on'); setTimeout(()=>t.remove(), 300); }, 2000);
+}
+
 function playLevelUpPulse() {
   const $badge = $("#levelBadge");
   $badge.removeClass("pulse");
@@ -560,7 +598,9 @@ function checkLevel(){
   let need = expToNext(S.level);
   while(S.exp >= need){
     S.exp -= need; S.level++; S.herd += 0; // maybe reward
-    log(`Farm leveled up! Now level ${S.level}`, "success");
+    //log(`Farm leveled up! Now level ${S.level}`, "success");
+    toast(`Farm leveled up! Now level ${S.level}`);
+
     playLevelUpPulse();
     levelupAudio.play();
     grantCoins( Math.floor(50 * S.level) );
@@ -582,454 +622,304 @@ function grantCoins(n){
 }
 
 // Continuous wandering alpacas without resetting
-function displayAlpacas(){
+// ---- State ----
+const Alpacas = []; // {el, x, y, vx, vy, flip, panicUntil:0}
+let cw = 0, ch = 0;
+let treeRects = []; // cached rects relative to the container
+let rafId = 0;
+let lastTs = 0;
+
+// Call once on load and whenever herd size changes
+function ensureHerdSize(target) {
   const container = $('#alpacaImagesContainer');
-  container.empty();
-  const maxHerd = S.barnLevel * 5;
-  const containerWidth = container.width();
-  const containerHeight = container.height();
 
-  for(let i=0;i<S.herd;i++){
-    //const randomIndex = Math.floor(Math.random()*alpacaImages.length);
-    //const img = $('<img class="alpaca">');
-    //img.attr('src', alpacaImages[randomIndex]);
-
+  // Grow
+  while (Alpacas.length < target) {
+    const img = document.createElement('img');
+    img.className = 'alpaca';
     const available = getAvailableAlpacaImages();
     const chosen = available[Math.floor(Math.random() * available.length)];
-    const img = $('<img>');
-    img.attr('src', chosen.src);
+    img.src = chosen.src;
 
-    img.css({
-      position: 'absolute',
-      left: Math.random() * (containerWidth - 48) + 'px',
-      top: Math.random() * (containerHeight - 48) + 'px',
-      transform: 'scaleX(1)'
-    });
-    container.append(img);
+    // random start pos
+    const x = Math.random() * Math.max(1, cw - 48);
+    const y = Math.random() * Math.max(1, ch - 48);
 
-    // Wander function for continuous random movement
-    // function wander(el) {
-    //   const container = $('#alpacaImagesContainer');
-    //   const containerWidth = container.width();
-    //   const containerHeight = container.height();
-    //
-    //   (function move(){
-    //     const currentLeft = parseFloat(el.css('left')) || 0;
-    //     const currentTop = parseFloat(el.css('top')) || 0;
-    //     const deltaX = (Math.random()-0.5)*20; // small steps
-    //     const deltaY = (Math.random()-0.5)*20;
-    //     const newLeft = Math.min(Math.max(currentLeft+deltaX, 0), containerWidth-48);
-    //     const newTop = Math.min(Math.max(currentTop+deltaY, 0), containerHeight-48);
-    //
-    //     // Flip occasionally
-    //     if(Math.random() < 0.3){
-    //       const currentTransform = el.css('transform');
-    //       el.css('transform', currentTransform === 'matrix(-1, 0, 0, 1, 0, 0)' ? 'scaleX(1)' : 'scaleX(-1)');
-    //     }
-    //
-    //     el.animate({left:newLeft+'px', top:newTop+'px'}, 4000 + Math.random()*4000, 'linear', move);
-    //   })();
-    // }
+    // small random wander velocity
+    const speed = 8 + Math.random() * 12; // px / second
+    const angle = Math.random() * Math.PI * 2;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
 
-
-    function updateAlpacaDepthAndScale(el, flip) {
-      const alpacaTop = el.position().top;
-      const alpacaLeft = el.position().left;
-      const alpacaWidth = el.outerWidth();
-      const alpacaHeight = el.outerHeight();
-      const containerHeight = $('#alpacaImagesContainer').height();
-
-      // 1️⃣ Scale based on vertical position (pseudo-3D)
-      const scale = 0.8 + 0.4 * (alpacaTop / containerHeight);
-
-      // 2️⃣ Check all trees for overlap and distance
-      const trees = $('.tree').map(function() {
-        const $t = $(this);
-        return {
-          left: $t.position().left,
-          top: $t.position().top,
-          width: $t.outerWidth(),
-          height: $t.outerHeight()
-        };
-      }).get();
-
-      let behind = false;
-      let opacity = 1;
-      let brightness = 1;
-      let dropShadow = '0px 0px 0px rgba(0,0,0,0)';
-
-      for (const tree of trees) {
-        const treeLeft = tree.left;
-        const treeRight = tree.left + tree.width;
-        const treeBottom = tree.top + tree.height;
-        const treeCenterX = tree.left + tree.width / 2;
-
-        const alpacaCenterX = alpacaLeft + alpacaWidth / 2;
-        const alpacaBottomY = alpacaTop + alpacaHeight;
-
-        // Check horizontal overlap
-        const overlapsX = alpacaCenterX > treeLeft && alpacaCenterX < treeRight;
-
-        // Vertical distance from tree base
-        const distanceY = treeBottom - alpacaBottomY; // positive if above tree base
-
-        if (overlapsX && distanceY > 0) {
-          behind = true;
-
-          // Fade opacity and brightness smoothly based on distance
-          const maxFadeDistance = 50; // pixels for max fade
-          const factor = Math.min(distanceY / maxFadeDistance, 1);
-
-          opacity = 1 - 0.2 * factor;           // 1 → 0.8
-          brightness = 1 - 0.15 * factor;       // 1 → 0.85
-          dropShadow = `0px 4px 2px rgba(0,0,0,0.3)`;
-
-          break; // stop at the first tree that affects the alpaca
-        }
-      }
-
-      // 3️⃣ Apply dynamic styles
-      el.css({
-        'z-index': behind ? 1 : 3,
-        //'opacity': opacity,
-        'filter': `brightness(${brightness}) ${dropShadow}`,
-        'transform': `scaleX(${flip}) scale(${scale})`
-      });
-    }
-
-    function wander(el) {
-      function move() {
-      const currentLeft = parseFloat(el.css('left')) || 0;
-      const currentTop = parseFloat(el.css('top')) || 0;
-      const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 200);
-      const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 200);
-
-      const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
-      const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
-
-      // Decide flip direction
-      const flip = deltaX >= 0 ? 1 : -1;
-
-      const stepTime = 6000 + Math.random() * 4000;
-
-      el.animate(
-        { left: newLeft + 'px', top: newTop + 'px' },
-        {
-          duration: stepTime,
-          easing: 'linear',
-          step: function(now, fx) {
-            // continuously update depth + scale + flip
-            updateAlpacaDepthAndScale(el, flip);
-          },
-          complete: move
-        }
-      );
-      }
-      move();
-    }
-
-    wander(img);
-
-    img.click(function() {
-      const el = $(this);
-      const runDuration = 3000; // 3 seconds
-      const containerWidth = $('#alpacaImagesContainer').width();
-      const containerHeight = $('#alpacaImagesContainer').height();
-
-      // Play alpaca noise
-      alpacaNoise.currentTime = 0;
-      alpacaNoise.play();
-
-      // Reduce happiness for stressing the alpaca
-      S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
-      S.alpacaClicks++; // 🆕 count clicks
-      checkAllAch();
-      log("The alpaca got stressed! Happiness -3", "warning");
-
-      el.stop(true);
-
-      // Random persistent direction for this run
-      const angle = Math.random() * 2 * Math.PI;
-      const speed = 1; // pixels per frame, smaller = smoother
-      const vx = Math.cos(angle) * speed;
-      const vy = Math.sin(angle) * speed;
-
-      const startTime = Date.now();
-
-      function runAway() {
-        const elapsed = Date.now() - startTime;
-        if (elapsed >= runDuration) {
-          wander(el); // resume normal wandering
-          return;
-        }
-
-        let currentLeft = parseFloat(el.css('left')) || 0;
-        let currentTop = parseFloat(el.css('top')) || 0;
-
-        // Move in persistent direction
-        let newLeft = currentLeft + vx;
-        let newTop = currentTop + vy;
-
-        // Keep inside container and adjust flip
-        let flip = vx >= 0 ? 1 : -1;
-        if (newLeft < 0 || newLeft > containerWidth - el.width()) {
-          newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
-          flip *= -1; // reverse flip if hitting wall
-        }
-
-        if (newTop < 0 || newTop > containerHeight - el.height()) {
-          newTop = Math.min(Math.max(newTop, 0), containerHeight - el.height());
-        }
-
-        el.css({ left: newLeft + 'px', top: newTop + 'px' });
-
-        // ✅ Update depth, scale, opacity, filter dynamically
-        updateAlpacaDepthAndScale(el, flip);
-
-        requestAnimationFrame(runAway);
-      }
-
-      runAway();
-      updateUI();
+    container[0].appendChild(img);
+    Alpacas.push({
+      el: img,
+      x, y,
+      vx, vy,
+      flip: 1,
+      panicUntil: 0,
+      wasPanicking: false,
+      calmSpeed: 5 + Math.random() * 5, // 10–20 px/s
+      nextTurnAt: performance.now() + 500 + Math.random() * 1500
     });
   }
+
+  // Shrink (hide to keep pool, or remove if you prefer)
+  while (Alpacas.length > target) {
+    const a = Alpacas.pop();
+    a.el.remove();
+  }
+}
+
+// No more container.empty() — we just sync changes
+function displayAlpacas(){
+  const container = $('#alpacaImagesContainer');
+  cw = container.width();
+  ch = container.height();
+
+  const maxHerd = S.barnLevel * 5;
+  ensureHerdSize(S.herd);
+
+  cacheTreeRects(); // compute once
+  startLoop();      // start or keep running
 
   $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
 }
 
-function addSingleAlpaca() {
-  const container = $('#alpacaImagesContainer');
-  const containerWidth = container.width();
-  const containerHeight = container.height();
-  //  const randomIndex = Math.floor(Math.random() * alpacaImages.length);
+// Cache tree rects relative to container; call on init and on resize / tree changes
+function cacheTreeRects() {
+  const container = $('#alpacaImagesContainer')[0];
+  const cRect = container.getBoundingClientRect();
 
+  treeRects = Array.from(document.querySelectorAll('.tree')).map(t => {
+    const r = t.getBoundingClientRect();
+    return {
+      left: r.left - cRect.left,
+      top: r.top - cRect.top,
+      right: r.right - cRect.left,
+      bottom: r.bottom - cRect.top,
+      width: r.width,
+      height: r.height,
+      centerX: (r.left + r.right) / 2 - cRect.left
+    };
+  });
+}
+
+function startLoop(){
+  if (rafId) return;
+  lastTs = performance.now();
+  const tick = (ts) => {
+    const dt = Math.min(0.05, (ts - lastTs) / 1000); // clamp to 50ms
+    lastTs = ts;
+
+    stepAlpacas(dt);
+    rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+}
+
+function stopLoop(){
+  cancelAnimationFrame(rafId);
+  rafId = 0;
+}
+
+// Movement + rendering
+function stepAlpacas(dt) {
+  const wanderJitter = 0.4; // small drift (radians/sec)
+  const now = performance.now();
+
+  for (let i = 0; i < Alpacas.length; i++) {
+    const a = Alpacas[i];
+    const panicking = now < a.panicUntil;
+
+    // --- Smooth speed control ---
+    const targetSpeed = panicking ? 60 : a.calmSpeed; // px/s
+    const accel = panicking ? 400 : 150;              // px/s^2
+    const curSpeed = Math.hypot(a.vx, a.vy) || targetSpeed;
+    const ds = targetSpeed - curSpeed;
+    const maxDelta = accel * dt;
+    const newSpeed = curSpeed + Math.max(-maxDelta, Math.min(maxDelta, ds));
+
+    // Current heading
+    let heading = Math.atan2(a.vy, a.vx);
+
+    // --- Random turn impulse (causes flips inside the field) ---
+    if (!panicking && now >= (a.nextTurnAt || 0)) {
+      const reverse = Math.random() < 0.5; // 50% chance to turn around-ish
+      const base = heading + (reverse ? Math.PI : 0);
+      const bigJitter = (Math.random() - 0.5) * 0.6; // ±~34°
+      heading = base + bigJitter;
+      a.nextTurnAt = now + (3000 + Math.random() * 10000); // next impulse in 0.8–2.8s
+    } else if (!panicking) {
+      // Small continuous drift when calm
+      heading += (Math.random() - 0.5) * wanderJitter * dt;
+    }
+
+    // Apply new velocity from heading & speed
+    a.vx = Math.cos(heading) * newSpeed;
+    a.vy = Math.sin(heading) * newSpeed;
+
+    // Integrate position
+    a.x += a.vx * dt;
+    a.y += a.vy * dt;
+
+    // Bounds with bounce
+    if (a.x < 0) { a.x = 0; a.vx = Math.abs(a.vx); }
+    if (a.x > cw - 48) { a.x = cw - 48; a.vx = -Math.abs(a.vx); }
+    if (a.y < 0) { a.y = 0; a.vy = Math.abs(a.vy); }
+    if (a.y > ch - 48) { a.y = ch - 48; a.vy = -Math.abs(a.vy); }
+
+    // Flip based on horizontal movement (now flips on turn impulses too)
+    a.flip = a.vx >= 0 ? 1 : -1;
+
+    // Depth/scale
+    const scale = 0.8 + 0.4 * (a.y / Math.max(1, ch));
+    let z = 3;
+    // (Optional) quick occlusion brightness if you want it back:
+    // let brightness = 1;
+
+    const alpacaCenterX = a.x + 24;
+    const alpacaBottomY = a.y + 48;
+    for (let t = 0; t < treeRects.length; t++) {
+      const tr = treeRects[t];
+      const overlapsX = alpacaCenterX > tr.left && alpacaCenterX < tr.right;
+      const distanceY = tr.bottom - alpacaBottomY;
+      if (overlapsX && distanceY > 0) {
+        // brightness = 1 - 0.15 * Math.min(distanceY / 50, 1);
+        z = 1;
+        break;
+      }
+    }
+
+    // Render
+    a.el.style.transform = `translate3d(${a.x}px, ${a.y}px, 0) scaleX(${a.flip}) scale(${scale})`;
+    // a.el.style.filter = `brightness(${brightness})`;
+    a.el.style.zIndex = z;
+  }
+}
+
+// One click handler (event delegation)
+$('#alpacaImagesContainer').on('click', '.alpaca', function(e) {
+  const idx = Alpacas.findIndex(a => a.el === this);
+  if (idx < 0) return;
+  const a = Alpacas[idx];
+
+  popEmote(
+    a.x + 24 + (Math.random() - 0.5) * 10,
+    a.y - 5 + (Math.random() - 0.5) * 10,
+    '😰'
+  );
+
+  // sound
+  try { alpacaNoise.currentTime = 0; alpacaNoise.play(); } catch(e){}
+
+  // game state effects
+  S.happiness = Math.max(0, S.happiness - 3);
+  S.alpacaClicks++;
+  checkAllAch();
+  log("The alpaca got stressed! Happiness -3", "warning");
+  updateUI();
+
+  // panic: set a fast persistent direction for 3s
+  const angle = Math.random() * Math.PI * 2;
+  const speed = 120; // px/s (smooth but fast)
+  a.vx = Math.cos(angle) * speed;
+  a.vy = Math.sin(angle) * speed;
+  a.panicUntil = performance.now() + 1500;
+});
+
+// Resize / tree changes
+window.addEventListener('resize', () => {
+  const container = $('#alpacaImagesContainer');
+  cw = container.width(); ch = container.height();
+  cacheTreeRects();
+});
+
+function addSingleAlpaca() {
+  const $container = $('#alpacaImagesContainer');
+  const container = $container[0];
+
+  // make sure we know the container size (if you already keep cw/ch fresh, this is redundant-safe)
+  cw = $container.width();
+  ch = $container.height();
+
+  // pick sprite
   const available = getAvailableAlpacaImages();
   const chosen = available[Math.floor(Math.random() * available.length)];
-  const img = $('<img>');
-  img.attr('src', chosen.src);
 
-  img.css({
-    position: 'absolute',
-    left: Math.random() * (containerWidth - 48) + 'px',
-    top: Math.random() * (containerHeight - 48) + 'px',
-    transform: 'scaleX(1)'
+  // create DOM node
+  const img = document.createElement('img');
+  img.className = 'alpaca';
+  img.src = chosen.src;
+
+  // random start pos
+  const x = Math.random() * Math.max(1, cw - 48);
+  const y = Math.random() * Math.max(1, ch - 48);
+
+  // put it in the container immediately (so it can fade in)
+  container.appendChild(img);
+
+  // create alpaca actor and add to pool
+  const calmSpeed = 5 + Math.random() * 5; // 10–20 px/s
+  const ang = Math.random() * Math.PI * 2;
+
+  Alpacas.push({
+    el: img,
+    x, y,
+    vx: Math.cos(ang) * calmSpeed,
+    vy: Math.sin(ang) * calmSpeed,
+    flip: 1,
+    panicUntil: 0,
+    calmSpeed,
+    nextTurnAt: performance.now() + 500 + Math.random() * 1500
+    // (no need for per-alpaca event handlers; you already have container delegation)
   });
-  container.append(img);
 
+  // initial render so it appears at the right spot before fade-in
+  img.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(1)`;
+  // fade in on the next frame (keeps transforms owned by the game loop)
+  requestAnimationFrame(() => {
+    img.classList.add('alpaca--spawn-in');
+  });
+
+  // optional: rare pink log
   if (chosen.name === 'pink') {
     log("✨ A rare pink alpaca has joined your herd!", "success");
   }
 
-  spawnAudio.play();
+  // spawn SFX
+  try { spawnAudio.currentTime = 0; spawnAudio.play(); } catch (e) {}
 
-  function updateAlpacaDepthAndScale(el, flip) {
-    const alpacaTop = el.position().top;
-    const alpacaLeft = el.position().left;
-    const alpacaWidth = el.outerWidth();
-    const alpacaHeight = el.outerHeight();
-    const containerHeight = $('#alpacaImagesContainer').height();
+  // lightweight "poof" effect
+  const poof = document.createElement('img');
+  poof.src = 'img/misc/poof.gif';
+  poof.className = 'spawn-poof';
+  // position the poof where the alpaca appears
+  poof.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  container.appendChild(poof);
 
-    // 1️⃣ Scale based on vertical position (pseudo-3D)
-    const scale = 0.8 + 0.4 * (alpacaTop / containerHeight);
-
-    // 2️⃣ Check all trees for overlap and distance
-    const trees = $('.tree').map(function() {
-      const $t = $(this);
-      return {
-        left: $t.position().left,
-        top: $t.position().top,
-        width: $t.outerWidth(),
-        height: $t.outerHeight()
-      };
-    }).get();
-
-    let behind = false;
-    let opacity = 1;
-    let brightness = 1;
-    let dropShadow = '0px 0px 0px rgba(0,0,0,0)';
-
-    for (const tree of trees) {
-      const treeLeft = tree.left;
-      const treeRight = tree.left + tree.width;
-      const treeBottom = tree.top + tree.height;
-      const treeCenterX = tree.left + tree.width / 2;
-
-      const alpacaCenterX = alpacaLeft + alpacaWidth / 2;
-      const alpacaBottomY = alpacaTop + alpacaHeight;
-
-      // Check horizontal overlap
-      const overlapsX = alpacaCenterX > treeLeft && alpacaCenterX < treeRight;
-
-      // Vertical distance from tree base
-      const distanceY = treeBottom - alpacaBottomY; // positive if above tree base
-
-      if (overlapsX && distanceY > 0) {
-        behind = true;
-
-        // Fade opacity and brightness smoothly based on distance
-        const maxFadeDistance = 50; // pixels for max fade
-        const factor = Math.min(distanceY / maxFadeDistance, 1);
-
-        opacity = 1 - 0.2 * factor;           // 1 → 0.8
-        brightness = 1 - 0.15 * factor;       // 1 → 0.85
-        dropShadow = `0px 4px 2px rgba(0,0,0,0.3)`;
-
-        break; // stop at the first tree that affects the alpaca
-      }
+  // simple grow + fade using JS (cheap) — no layout reads
+  const poofStart = performance.now();
+  const POOL_MS = 800;
+  (function animPoof(ts) {
+    const t = Math.min(1, (ts - poofStart) / POOL_MS);
+    const w = 31 + (48 - 31) * t;
+    const h = 26 + (48 - 26) * t;
+    poof.style.width = w + 'px';
+    poof.style.height = h + 'px';
+    poof.style.opacity = (1 - t).toFixed(3);
+    if (t < 1) {
+      requestAnimationFrame(animPoof);
+    } else {
+      poof.remove();
     }
+  })(poofStart);
 
-    // 3️⃣ Apply dynamic styles
-    el.css({
-      'z-index': behind ? 1 : 3,
-      //'opacity': opacity,
-      'filter': `brightness(${brightness}) ${dropShadow}`,
-      'transform': `scaleX(${flip}) scale(${scale})`
-    });
-  }
+  // make sure the RAF loop is running
+  startLoop();
 
-  // --- Wandering logic (reuse your wander function)
-  function wander(el) {
-    function move() {
-    const currentLeft = parseFloat(el.css('left')) || 0;
-    const currentTop = parseFloat(el.css('top')) || 0;
-    const deltaX = (Math.random() - 0.5) * (20 + Math.random() * 200);
-    const deltaY = (Math.random() - 0.5) * (20 + Math.random() * 200);
-
-    const newLeft = Math.min(Math.max(currentLeft + deltaX, 0), containerWidth - 48);
-    const newTop = Math.min(Math.max(currentTop + deltaY, 0), containerHeight - 48);
-
-    // Decide flip direction
-    const flip = deltaX >= 0 ? 1 : -1;
-
-    const stepTime = 6000 + Math.random() * 4000;
-
-    el.animate(
-      { left: newLeft + 'px', top: newTop + 'px' },
-      {
-        duration: stepTime,
-        easing: 'linear',
-        step: function(now, fx) {
-          // continuously update depth + scale + flip
-          updateAlpacaDepthAndScale(el, flip);
-        },
-        complete: move
-      }
-    );
-    }
-    move();
-  }
-
-  // spawn animation - drop drom top
-  // const spawnY = -40; // start slightly above container
-  // const targetTop = Math.random() * (containerHeight - 48);
-  // img.css({ top: spawnY + 'px', opacity: 0 });
-  // container.append(img);
-  // img.animate(
-  //   { top: targetTop + 'px', opacity: 1 },
-  //   { duration: 800, easing: 'swing', complete: () => wander(img) }
-  // );
-
-  // --- Spawn animation
-  img.css({
-    opacity: 0,
-    transform: 'scale(0.5)'
-  });
-  img.animate(
-    { opacity: 1 },
-    {
-      duration: 400,
-      step: function (now, fx) {
-        if (fx.prop === "opacity") {
-          const scale = 0.5 + now * 0.5;
-          $(this).css('transform', `scale(${scale})`);
-        }
-      },
-      complete: function () {
-        $(this).css('transform', 'scaleX(1)'); // restore normal facing
-        wander(img);
-      }
-    }
-  );
-
-  // poof animation
-  const poof = $('<img src="img/misc/poof.gif" class="spawn-poof">');
-  poof.css({
-    position: 'absolute',
-    left: img.css('left'),
-    top: img.css('top'),
-    width: '31px',
-    height: '26px',
-    opacity: 1,
-    pointerEvents: 'none'
-  });
-  container.append(poof);
-  poof.animate({ opacity: 0, width: '48px', height: '48px' }, 800, () => poof.remove());
-
-  //wander(img);
-
-  // --- Click behavior
-  img.click(function() {
-    const el = $(this);
-    const runDuration = 3000; // 3 seconds
-    const containerWidth = $('#alpacaImagesContainer').width();
-    const containerHeight = $('#alpacaImagesContainer').height();
-
-    // Play alpaca noise
-    alpacaNoise.currentTime = 0;
-    alpacaNoise.play();
-
-    // Reduce happiness for stressing the alpaca
-    S.happiness = Math.max(0, S.happiness - 3); // decrease by 3%
-    S.alpacaClicks++; // 🆕 count clicks
-    checkAllAch();
-    log("The alpaca got stressed! Happiness -3", "warning");
-
-    el.stop(true);
-
-    // Random persistent direction for this run
-    const angle = Math.random() * 2 * Math.PI;
-    const speed = 1; // pixels per frame, smaller = smoother
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
-
-    const startTime = Date.now();
-
-    function runAway() {
-      const elapsed = Date.now() - startTime;
-      if (elapsed >= runDuration) {
-        wander(el); // resume normal wandering
-        return;
-      }
-
-      let currentLeft = parseFloat(el.css('left')) || 0;
-      let currentTop = parseFloat(el.css('top')) || 0;
-
-      // Move in persistent direction
-      let newLeft = currentLeft + vx;
-      let newTop = currentTop + vy;
-
-      // Keep inside container and adjust flip
-      let flip = vx >= 0 ? 1 : -1;
-      if (newLeft < 0 || newLeft > containerWidth - el.width()) {
-        newLeft = Math.min(Math.max(newLeft, 0), containerWidth - el.width());
-        flip *= -1; // reverse flip if hitting wall
-      }
-
-      if (newTop < 0 || newTop > containerHeight - el.height()) {
-        newTop = Math.min(Math.max(newTop, 0), containerHeight - el.height());
-      }
-
-      el.css({ left: newLeft + 'px', top: newTop + 'px' });
-
-      // ✅ Update depth, scale, opacity, filter dynamically
-      updateAlpacaDepthAndScale(el, flip);
-
-      requestAnimationFrame(runAway);
-    }
-
-    runAway();
-    updateUI();
-  });
+  // if trees can appear/disappear around spawn spots and you care about immediate occlusion,
+  // you can call cacheTreeRects() here, but usually it's fine to rely on your existing hooks.
 }
 
 function spawnTrees(count = 15) {
@@ -1164,8 +1054,9 @@ function pet() {
   checkAllAch();
   log(`You spent time petting your alpacas (+${happinessGain}% happiness, +${expGain} XP).`, "normal");
   autosave();
-}
 
+  emoteAll('💖');
+}
 
 // function pet(){ addExp(5); S.happiness = Math.min(100, S.happiness + 2); log('You pet the alpacas.', "normal"); autosave(); }
 
@@ -1202,6 +1093,8 @@ function feed() {
 
   log(`You fed your ${S.herd} alpacas (-${totalCost} coins, +${happinessGain}% happiness).`, "normal");
   autosave();
+
+  emoteAll('🥕');
 }
 
 
@@ -1526,7 +1419,8 @@ function checkAllAch(){
   ACH_DEFS.forEach(a=>{
     if(!S.achievements[a.id] && a.check(S)){
       S.achievements[a.id] = {unlocked:true, time:Date.now()}; S.unlockedAch.push(a.id);
-      log(`Achievement unlocked: ${a.title}`, "success");
+      //log(`Achievement unlocked: ${a.title}`, "success");
+      toast(`Achievement unlocked: ${a.title}`);
       // small reward
       // S.coins += 100; S.wool += 10; updateUI();
     }
@@ -1821,6 +1715,7 @@ document.addEventListener("visibilitychange", () => {
     //allAudio.forEach(a => { if (a) a.muted = true; });
 
     S.lastPlayed = Date.now();
+    stopLoop();
     stopMainLoop();
   } else {
     // unmute audio
@@ -1845,6 +1740,8 @@ document.addEventListener("visibilitychange", () => {
       updateUI();
     }
 
+    cacheTreeRects(); // sizes may have changed
+    startLoop();
     startMainLoop();
     S.lastPlayed = now;
   }
@@ -1888,7 +1785,7 @@ function initGame(){
   checkAllAch();
   // autosave every 60s
   if(autosaveTimer) clearInterval(autosaveTimer);
-  autosaveTimer = setInterval(()=>{ saveState(); log("Game saved");}, 60000);
+  autosaveTimer = setInterval(()=>{ saveState(); toast("Game saved");}, 60000);
 }
 
 const assets = [
