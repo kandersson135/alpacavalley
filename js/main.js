@@ -1252,7 +1252,7 @@ function buyAlpaca() {
   log('You bought a new alpaca for your farm.', "success");
   addExp(10);
   autosave();
-
+  checkAllAch();
   addSingleAlpaca(); // add only one new alpaca instead of reloading
   $('#displayHerdSize').text(`${S.herd} / ${maxHerd}`);
 }
