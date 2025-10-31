@@ -389,22 +389,22 @@ $('#messageCenter').on('click', '.logChoice', function() {
       log("You move on. The alpacas stare… unimpressed.", "warning");
       break;
     case 'chat':
-      grantCoins(25);
-      log("The merchant shares a tip and a small coin. (+25 coins)", "success");
+      grantCoins(1000);
+      log("The merchant shares a tip and a small coin. (+1000 coins)", "success");
       break;
     case 'pass':
       log("You keep tending the farm. Steady as ever.", "info");
       break;
     case 'grab':
-      S.wool += 3;
-      addExp(2);
-      log("You catch the tuft! (+3 wool, +2 XP)", "success");
+      S.wool += 2500;
+      addExp(25);
+      log("You catch the tuft! (+2500 wool, +25 XP)", "success");
       break;
     case 'leave':
       log("You watch it drift into the sunlight. Peaceful.", "info");
       break;
     case 'collect':
-      const woolFound = 10 + Math.floor(Math.random() * 10);
+      const woolFound = 1000 + Math.floor(Math.random() * 10);
       S.wool += woolFound;
       addExp(4);
       log(`You gather some soft wool from the grass (+${woolFound} wool).`, "success");
@@ -424,12 +424,12 @@ $('#messageCenter').on('click', '.logChoice', function() {
 
     // --- new: merchant trade option ---
     case 'buy': {
-      if (S.wool >= 5) {
-        S.wool -= 5;
-        const sale = 50 + Math.floor(S.level * 4);
+      if (S.wool >= 100) {
+        S.wool -= 100;
+        const sale = 5000 + Math.floor(S.level * 4);
         S.coins += sale;
         addExp(6);
-        log(`You trade 5 wool for ${sale} coins. The merchant smiles warmly. 💰`, "success");
+        log(`You trade 100 wool for ${sale} coins. The merchant smiles warmly. 💰`, "success");
       } else {
         log("You don’t have enough wool to trade.", "error");
       }
@@ -440,7 +440,7 @@ $('#messageCenter').on('click', '.logChoice', function() {
     case 'investigate': {
       const found = Math.random() < 0.5;
       if (found) {
-        const coins = 100 + Math.floor(Math.random() * 50);
+        const coins = 10000 + Math.floor(Math.random() * 50);
         S.coins += coins;
         addExp(8);
         log(`You found ${coins} coins hidden under a tuft of wool! 🪙`, "success");
@@ -472,7 +472,7 @@ $('#messageCenter').on('click', '.logChoice', function() {
       log("You take a deep breath and admire the view. Happiness +4 🌈", "success");
       break;
     case 'shearRainbow': {
-      const rainbowWool = 30 + Math.floor(S.level * 2);
+      const rainbowWool = 1000 + Math.floor(S.level * 2);
       S.wool += rainbowWool;
       addExp(5);
       log(`You quickly shear ${rainbowWool} rainbow-tinted wool. Magical! 🧶✨`, "success");
@@ -499,11 +499,11 @@ $('#messageCenter').on('click', '.logChoice', function() {
     case 'wish': {
       const r = Math.random();
       if (r < 0.33) {
-        S.coins += 200;
-        log("Your wish comes true! +200 coins 💫", "success");
+        S.coins += 2000;
+        log("Your wish comes true! +2000 coins 💫", "success");
       } else if (r < 0.66) {
-        S.wool += 100;
-        log("A bundle of starlit wool appears in your barn! +100 wool 🌟", "success");
+        S.wool += 1000;
+        log("A bundle of starlit wool appears in your barn! +1000 wool 🌟", "success");
       } else {
         S.happiness = Math.min(100, S.happiness + 10);
         log("You feel a warm, happy glow inside. Happiness +10 ✨", "success");
@@ -1237,7 +1237,7 @@ function craft() {
 function buyAlpaca() {
   const maxHerd = S.barnLevel * 5;
   if (S.herd >= maxHerd) {
-    log('Your barn is full! Upgrade to add more alpacas.', "error");
+    log('Your herd is full! Upgrade to add more alpacas.', "error");
     return;
   }
 
