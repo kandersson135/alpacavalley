@@ -1291,7 +1291,7 @@ function upgradeBarn(){
   }
   S.coins -= cost;
   S.barnLevel++;
-  log('Barn upgraded. Herd capacity increased.', "success");
+  log('Herd upgraded - more room for alpacas!', "success");
   upgradeAudio.play();
   autosave();
 
