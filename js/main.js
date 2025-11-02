@@ -573,12 +573,29 @@ function emoteAll(char) {
 }
 
 // toast message
+// function toast(msg){
+//   const t = document.createElement('div');
+//   t.className = 'toast'; t.textContent = msg;
+//   document.body.appendChild(t);
+//   setTimeout(()=>t.classList.add('on'), 10);
+//   setTimeout(()=>{ t.classList.remove('on'); setTimeout(()=>t.remove(), 300); }, 2000);
+// }
+
 function toast(msg){
+  const toasts = document.querySelectorAll('.toast');
+  const offset = 24 + (toasts.length * 40); // 40px spacing
+
   const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
+  t.className = 'toast';
+  t.textContent = msg;
+  t.style.bottom = offset + 'px';
   document.body.appendChild(t);
-  setTimeout(()=>t.classList.add('on'), 10);
-  setTimeout(()=>{ t.classList.remove('on'); setTimeout(()=>t.remove(), 300); }, 2000);
+
+  setTimeout(() => t.classList.add('on'), 10);
+  setTimeout(() => {
+    t.classList.remove('on');
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
 }
 
 function playLevelUpPulse() {
